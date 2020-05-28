@@ -40,7 +40,7 @@ namespace Comander.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Commads");
+                    b.ToTable("Commands");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200528115126_InitialMigration")]
+    [Migration("20200528155117_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,7 @@ namespace Comander.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Commads");
+                    b.ToTable("Commands");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,7 +7,7 @@ namespace Comander.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Commads",
+                name: "Commands",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -18,14 +18,14 @@ namespace Comander.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Commads", x => x.Id);
+                    table.PrimaryKey("PK_Commands", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Commads");
+                name: "Commands");
         }
     }
 }
