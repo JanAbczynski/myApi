@@ -3,11 +3,13 @@ using AutoMapper;
 using Commander.Data;
 using Commander.Dtos;
 using Commander.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Comander.Controllers
 {
     //api/commands
+    // [EnableCors("_Policy")]
     [Route("api/[controller]")]
     [ApiController]
     public class CommandsController: ControllerBase
@@ -43,7 +45,7 @@ namespace Comander.Controllers
 
         }
 
-        // GET api/commands/{id}
+
         [HttpPost]
         public ActionResult <CommandReadDto> CreateCommand(CommandCreateDto commandCreateDto)
         {
@@ -56,5 +58,34 @@ namespace Comander.Controllers
             return CreatedAtRoute(nameof(GetCommandById), new {Id = commandReadDto.Id}, commandReadDto);
             // return Ok(commonModel);
         }
+
+        //PUT api/commands/{id}
+        [HttpPut("{id}")]
+        public ActionResult UpdateCommand(int id, CommandUpdateDto commandUpdateDto)
+        {
+            	
+            var commandModelFromRepo = _repository.GetCommandById(id);
+            if(commandModelFromRepo == null){
+                return NotFound();
+            }
+            _mapper.Map(commandUpdateDto, commandModelFromRepo);
+            _repository.Update(commandModelFromRepo);
+            _repository.SaveChanges();
+            return NoContent();
+        }
+
+
+        //PATCH api/commands/{id}
+        // [HttpPatch("{id}")]
+        // public ActionResult PatchCommand(int id, CommandUpdateDto commandUpdateDto){
+
+        //     var commandModelFromRepo = _repository.GetCommandById(id);
+        //     if(commandModelFromRepo == null){
+        //         return NotFound();
+        //     }
+
+
+        //     return NoContent();
+        // }
     }
 }
