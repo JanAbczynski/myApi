@@ -1,10 +1,20 @@
+using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using AutoMapper;
+using Comander.Models;
 using Commander.Data;
 using Commander.Dtos;
 using Commander.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Comander.Controllers
 {
@@ -16,14 +26,24 @@ namespace Comander.Controllers
     {
         private readonly ICommanderRepo _repository;
         private readonly IMapper _mapper;
+        private IConfiguration _config;
 
-        public CommandsController(ICommanderRepo repository, IMapper mapper)
+
+        public CommandsController(ICommanderRepo repository, IMapper mapper, IConfiguration config)
         {
             _repository = repository;
             _mapper = mapper;
+            _config = config;
         }
+
+        // GET api/commands/login
+        [HttpGet("login")]
+
         // private readonly MockCommanderRepo _repository = new MockCommanderRepo();
         //api/commands
+
+        
+        [Authorize]
         [HttpGet]
         public ActionResult <IEnumerable<CommandReadDto>> GetAllCommands()
         {
@@ -76,16 +96,43 @@ namespace Comander.Controllers
 
 
         //PATCH api/commands/{id}
-        // [HttpPatch("{id}")]
-        // public ActionResult PatchCommand(int id, CommandUpdateDto commandUpdateDto){
+        [HttpPatch("{id}")]
+        public ActionResult PatchCommand(int id, JsonPatchDocument<CommandUpdateDto> patchDoc){
 
-        //     var commandModelFromRepo = _repository.GetCommandById(id);
-        //     if(commandModelFromRepo == null){
-        //         return NotFound();
-        //     }
+            var commandModelFromRepo = _repository.GetCommandById(id);
+            if(commandModelFromRepo == null){
+                return NotFound();
+            }
+
+            var CommandToPatch = _mapper.Map<CommandUpdateDto>(commandModelFromRepo);
+            patchDoc.ApplyTo(CommandToPatch, ModelState);
+            if(!TryValidateModel(CommandToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            _mapper.Map(CommandToPatch, commandModelFromRepo);
+
+            _repository.Update(commandModelFromRepo);
+
+            _repository.SaveChanges();
 
 
-        //     return NoContent();
-        // }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeleteCommand (int id){
+
+            var commandModelFromRepo = _repository.GetCommandById(id);
+            if(commandModelFromRepo == null){
+                return NotFound();
+            }
+
+            _repository.DeleteCommand(commandModelFromRepo);
+            _repository.SaveChanges();
+            return NoContent();
+        }
+
     }
 }

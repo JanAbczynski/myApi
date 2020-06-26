@@ -14,7 +14,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Microsoft.AspNetCore.Cors;
-
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Comander
 {
@@ -31,10 +34,18 @@ namespace Comander
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            // .AddJwtBearer(opt => 
+            // {
+            //     opt.Audience = Configuration["AAD:ResourceId"];
+            //     opt.Authority = $"{Configuration["AAD:InstanceId"]}{Configuration["AAD:TenantId"]}";
+            // }); 
+
             services.AddCors(options => {
                 options.AddPolicy(AllowAllOriginsPolicy, 
                 builder =>
                 {
+                    //builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                 });
             });
@@ -44,7 +55,26 @@ namespace Comander
 
             (Configuration.GetConnectionString("CommanderConnection")));
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(s => {
+                s.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer= true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Issuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+
+                    };
+                });
+
+            services.AddMvc();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -63,6 +93,8 @@ namespace Comander
             
             app.UseRouting();
 
+            // app.UseAuthentication();
+
             // app.UseCors(builder =>
             // {
             //     builder.WithOrigins("http//localhost:4200");
@@ -71,6 +103,8 @@ namespace Comander
             // });
 
             app.UseCors(AllowAllOriginsPolicy);
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -7,7 +7,6 @@ G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Comander.runtimeconfi
 G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Comander.runtimeconfig.dev.json
 G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Comander.dll
 G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Comander.pdb
-G:\codecool\advance\myApi\Comander\obj\Debug\netcoreapp3.1\Comander.csprojAssemblyReference.cache
 G:\codecool\advance\myApi\Comander\obj\Debug\netcoreapp3.1\staticwebassets\Comander.StaticWebAssets.Manifest.cache
 G:\codecool\advance\myApi\Comander\obj\Debug\netcoreapp3.1\staticwebassets\Comander.StaticWebAssets.xml
 G:\codecool\advance\myApi\Comander\obj\Debug\netcoreapp3.1\Comander.MvcApplicationPartsAssemblyInfo.cache
@@ -160,3 +159,15 @@ G:\codecool\advance\myApi\Comand\obj\Debug\netcoreapp3.1\Comander.RazorTargetAss
 G:\codecool\advance\myApi\Comand\obj\Debug\netcoreapp3.1\Comander.csproj.CopyComplete
 G:\codecool\advance\myApi\Comand\obj\Debug\netcoreapp3.1\Comander.dll
 G:\codecool\advance\myApi\Comand\obj\Debug\netcoreapp3.1\Comander.pdb
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.JsonPatch.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Newtonsoft.Json.Bson.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.JsonWebTokens.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Logging.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Tokens.dll
+G:\codecool\advance\myApi\Comander\bin\Debug\netcoreapp3.1\System.IdentityModel.Tokens.Jwt.dll
+G:\codecool\advance\myApi\Comander\obj\Debug\netcoreapp3.1\Comander.csprojAssemblyReference.cache

@@ -20,6 +20,8 @@ namespace Comander
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseUrls("https://localhost:44336/");
+                    webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 });
     }
