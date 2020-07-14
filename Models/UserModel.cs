@@ -1,7 +1,8 @@
-namespace Comander.Models
+namespace Commander.Models
 {
     public class UserModel
     {
+
         public int Id { get; set; }
         public string UserLogin { get; set; }
         public string UserPass { get; set; }
@@ -13,6 +14,7 @@ namespace Comander.Models
         public string UserMail { get; set; }
         public string UserPhoneNumber { get; set; }
         public string UserPhoneNumber2 { get; set; }
+        public string UserSalt { get; set; }
         public string UserRole {get; set; }
     }
 }

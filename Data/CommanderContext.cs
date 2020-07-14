@@ -11,6 +11,7 @@ namespace Commander.Data
         }
 
         public DbSet<Command> Commands { get; set; }
+        public DbSet<UserModel> Users { get; set; }
     }
 
 }

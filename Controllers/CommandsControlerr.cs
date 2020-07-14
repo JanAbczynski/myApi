@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
-using Comander.Models;
 using Commander.Data;
 using Commander.Dtos;
 using Commander.Models;
@@ -24,14 +23,17 @@ namespace Comander.Controllers
     [ApiController]
     public class CommandsController: ControllerBase
     {
-        private readonly ICommanderRepo _repository;
+        private readonly IUserRepo _repositoryUser;
+        private readonly ICommanderRepo _repositoryCommander;
         private readonly IMapper _mapper;
         private IConfiguration _config;
 
 
-        public CommandsController(ICommanderRepo repository, IMapper mapper, IConfiguration config)
+        //public CommandsController(IUserRepo repositoryUser, ICommanderRepo repositoryCommander, IMapper mapper, IConfiguration config)
+        public CommandsController(ICommanderRepo repositoryCommander, IMapper mapper, IConfiguration config)
         {
-            _repository = repository;
+            //_repositoryUser = repositoryUser;
+            _repositoryCommander = repositoryCommander;
             _mapper = mapper;
             _config = config;
         }
@@ -48,7 +50,7 @@ namespace Comander.Controllers
         public ActionResult <IEnumerable<CommandReadDto>> GetAllCommands()
         {
             
-            var commandItems = _repository.GetAllCommands();
+            var commandItems = _repositoryCommander.GetAllCommands();
 
             return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(commandItems));
         }
@@ -57,7 +59,7 @@ namespace Comander.Controllers
         [HttpGet("{id}", Name="GetCommandById")]
         public ActionResult <CommandReadDto> GetCommandById(int id)
         {
-            var commandItem = _repository.GetCommandById(id);
+            var commandItem = _repositoryCommander.GetCommandById(id);
             if (commandItem != null){
             return Ok(_mapper.Map<CommandReadDto>(commandItem));
             }
@@ -70,8 +72,8 @@ namespace Comander.Controllers
         public ActionResult <CommandReadDto> CreateCommand(CommandCreateDto commandCreateDto)
         {
             var commonModel = _mapper.Map<Command>(commandCreateDto);   
-            _repository.CreateCommande(commonModel);
-            _repository.SaveChanges();
+            _repositoryCommander.CreateCommande(commonModel);
+            _repositoryCommander.SaveChanges();
 
             var commandReadDto = _mapper.Map<CommandReadDto>(commonModel);
 
@@ -84,13 +86,13 @@ namespace Comander.Controllers
         public ActionResult UpdateCommand(int id, CommandUpdateDto commandUpdateDto)
         {
             	
-            var commandModelFromRepo = _repository.GetCommandById(id);
+            var commandModelFromRepo = _repositoryCommander.GetCommandById(id);
             if(commandModelFromRepo == null){
                 return NotFound();
             }
             _mapper.Map(commandUpdateDto, commandModelFromRepo);
-            _repository.Update(commandModelFromRepo);
-            _repository.SaveChanges();
+            _repositoryCommander.Update(commandModelFromRepo);
+            _repositoryCommander.SaveChanges();
             return NoContent();
         }
 
@@ -99,7 +101,7 @@ namespace Comander.Controllers
         [HttpPatch("{id}")]
         public ActionResult PatchCommand(int id, JsonPatchDocument<CommandUpdateDto> patchDoc){
 
-            var commandModelFromRepo = _repository.GetCommandById(id);
+            var commandModelFromRepo = _repositoryCommander.GetCommandById(id);
             if(commandModelFromRepo == null){
                 return NotFound();
             }
@@ -113,9 +115,9 @@ namespace Comander.Controllers
 
             _mapper.Map(CommandToPatch, commandModelFromRepo);
 
-            _repository.Update(commandModelFromRepo);
+            _repositoryCommander.Update(commandModelFromRepo);
 
-            _repository.SaveChanges();
+            _repositoryCommander.SaveChanges();
 
 
             return NoContent();
@@ -124,13 +126,13 @@ namespace Comander.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteCommand (int id){
 
-            var commandModelFromRepo = _repository.GetCommandById(id);
+            var commandModelFromRepo = _repositoryCommander.GetCommandById(id);
             if(commandModelFromRepo == null){
                 return NotFound();
             }
 
-            _repository.DeleteCommand(commandModelFromRepo);
-            _repository.SaveChanges();
+            _repositoryCommander.DeleteCommand(commandModelFromRepo);
+            _repositoryCommander.SaveChanges();
             return NoContent();
         }
 

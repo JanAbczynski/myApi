@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "G:\\codecool\\advance\\myApi\\Comander\\Comander.csproj": {}
+    "G:\\codecool\\advance\\myApi\\Comander.csproj": {}
   },
   "projects": {
-    "G:\\codecool\\advance\\myApi\\Comander\\Comander.csproj": {
+    "G:\\codecool\\advance\\myApi\\Comander.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\codecool\\advance\\myApi\\Comander\\Comander.csproj",
+        "projectUniqueName": "G:\\codecool\\advance\\myApi\\Comander.csproj",
         "projectName": "Comander",
-        "projectPath": "G:\\codecool\\advance\\myApi\\Comander\\Comander.csproj",
+        "projectPath": "G:\\codecool\\advance\\myApi\\Comander.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "G:\\codecool\\advance\\myApi\\Comander\\obj\\",
+        "outputPath": "G:\\codecool\\advance\\myApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
