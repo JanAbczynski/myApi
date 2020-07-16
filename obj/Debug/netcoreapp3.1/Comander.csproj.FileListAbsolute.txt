@@ -236,3 +236,5 @@ G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.csproj.CopyComplete
 G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.dll
 G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.pdb
 G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.csprojAssemblyReference.cache
+G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.csproj.CoreCompileInputs.cache
+G:\codecool\advance\myApi\obj\Debug\netcoreapp3.1\Comander.genruntimeconfig.cache

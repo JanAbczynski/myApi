@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using System.Net;
+using System.Net.Mail;
 
 namespace Comander.Controllers
 {
@@ -29,6 +31,7 @@ namespace Comander.Controllers
         private readonly IUserRepo _repositoryUsers;
         private readonly IMapper _mapper;
         private IConfiguration _config;
+        SmtpClient cv = new SmtpClient("smtp.gmail.com", 587);
 
 
         public LoginController(IUserRepo repositoryUsers, IMapper mapper, IConfiguration config)
@@ -38,7 +41,68 @@ namespace Comander.Controllers
             _config = config;
         }
 
+
+
+        [HttpPost ("dupa")]
+        public IActionResult Test2()
+        {
+
+
+            return Ok();
+        }
+
+
+
+
+
+
         // POST api/login/postlogin
+        [HttpPost]
+        public IActionResult test()
+        {
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("john.cornishon@gmail.com", "Longinusa2"),
+                EnableSsl = true,
+            };            
+            try
+            { 
+                smtpClient.Send("john.cornishon@gmail.com", "j.abc@wp.pl", "test", "email");
+                Console.WriteLine("ok");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("not ok");
+            }
+            return Ok();
+        }
+
+        private String CreateEmail()
+        {
+            var link = "";
+            return "ss";
+        }
+
+        [HttpGet]
+        //[HttpPost]
+        //[HttpGet("{code}", Name = "GetCode")]
+        public ActionResult getCode()
+        {
+            var idx = "";
+            var x = 5;
+            return NotFound();
+        }
+
+
+
+        [HttpGet]
+        public ActionResult getCode2(int code)
+        {
+            var idx = "";
+            var x = 5;
+            return NotFound();
+        }
 
         [HttpPost]
         //public ActionResult<UserDto> PostLogin(string username, string password)
@@ -122,7 +186,6 @@ namespace Comander.Controllers
             return encodetoken;
         }
 
-        //GET api/commands/post
         [Authorize]
         [HttpPost]
         public string Post() {
