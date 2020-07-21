@@ -1,5 +1,6 @@
 using AutoMapper;
 using Comander.Dtos;
+using Comander.Models;
 using Commander.Dtos;
 using Commander.Models;
 
@@ -13,8 +14,12 @@ namespace Commander.Profiles
             CreateMap<CommandCreateDto, Command>();
             CreateMap<CommandUpdateDto, Command>();
             CreateMap<Command, CommandUpdateDto>();
+
             CreateMap<UserDto, UserModel>();
             CreateMap<UserModel, UserDto>();
+
+            CreateMap<CodeModel, CodeDto>();
+            CreateMap<CodeDto, CodeModel>();
         }
     }
 

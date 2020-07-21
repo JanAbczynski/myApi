@@ -1,3 +1,4 @@
+using Comander.Models;
 using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ namespace Commander.Data
 
         public DbSet<Command> Commands { get; set; }
         public DbSet<UserModel> Users { get; set; }
+        public DbSet<CodeModel> Code { get; set; }
     }
 
 }

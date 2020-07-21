@@ -32,6 +32,7 @@ namespace Comander.Controllers
         private readonly IMapper _mapper;
         private IConfiguration _config;
         SmtpClient cv = new SmtpClient("smtp.gmail.com", 587);
+        static string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
 
 
         public LoginController(IUserRepo repositoryUsers, IMapper mapper, IConfiguration config)
@@ -42,66 +43,27 @@ namespace Comander.Controllers
         }
 
 
-
-        [HttpPost ("dupa")]
-        public IActionResult Test2()
-        {
-
-
-            return Ok();
-        }
-
-
-
-
-
-
-        // POST api/login/postlogin
         [HttpPost]
-        public IActionResult test()
+        public IActionResult VeryfieEmail(string userLogin)
         {
-            var smtpClient = new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("john.cornishon@gmail.com", "Longinusa2"),
-                EnableSsl = true,
-            };            
-            try
-            { 
-                smtpClient.Send("john.cornishon@gmail.com", "j.abc@wp.pl", "test", "email");
-                Console.WriteLine("ok");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("not ok");
-            }
+            EmailSender email = new EmailSender();
+            string verificationCode = email.GenerateRawCode();
+            MailMessage message = email.VeryfiEmail("j.abc@wp.pl", verificationCode);
+            SmtpClient smtpConfiguration = email.ConfigureSmtp();
+            
+            email.SendEmail(smtpConfiguration, message);
+
             return Ok();
         }
 
-        private String CreateEmail()
-        {
-            var link = "";
-            return "ss";
-        }
 
         [HttpGet]
-        //[HttpPost]
-        //[HttpGet("{code}", Name = "GetCode")]
-        public ActionResult getCode()
+        public ActionResult getCode(string code)
         {
-            var idx = "";
+            
+            var idx = "g";
             var x = 5;
-            return NotFound();
-        }
-
-
-
-        [HttpGet]
-        public ActionResult getCode2(int code)
-        {
-            var idx = "";
-            var x = 5;
-            return NotFound();
+            return Ok();
         }
 
         [HttpPost]
@@ -215,13 +177,6 @@ namespace Comander.Controllers
             {
                 return NotFound("e-mail is not unique");
             }
-            var test1_String = "qweasd";
-            var test2_byte = Encoding.ASCII.GetBytes(test1_String);
-            var test3_string = Encoding.UTF8.GetString(test2_byte, 0, test2_byte.Length);
-            var test4_byte = Encoding.ASCII.GetBytes(test3_string);
-
-
-
 
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
@@ -230,6 +185,8 @@ namespace Comander.Controllers
             commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
             _repositoryUsers.Register(commonModel);
             _repositoryUsers.SaveChanges();
+            int userId = commonModel.Id;
+            VeryfieEmail(commonModel.UserLogin);
             return commonModel;
         }
 
