@@ -13,13 +13,21 @@ namespace Comander.Controllers
         string generalAddress = @"https://localhost:44336/";
         string x = "asdasd";
 
-        public MailMessage VeryfiEmail(string to, string code)
+        string host = "smtp.gmail.com";
+        int port = 587;
+        string senderAddress = "john.cornishon@gmail.com";
+        string senderPassword = "Longinusa2";
+
+
+        public bool VeryfiEmail(string to, string code)
         {
             string subject = CreateSubject();
             string mailBody = BodyBuilder(code);
             MailMessage messageDetail = BuildMessage(from, to, subject, mailBody);
+            SmtpClient smtpConfiguration = ConfigureSmtp();
+            SendEmail(smtpConfiguration, messageDetail);
 
-            return messageDetail;
+            return true;
         }
 
         private string CreateSubject()
@@ -73,11 +81,11 @@ namespace Comander.Controllers
             return fullAddrress;
         }
 
-        public string GenerateRawCode()
-        {
-            Guid validCode = Guid.NewGuid();
-            return validCode.ToString();
-        }
+        //public string GenerateRawCode()
+        //{
+        //    Guid validCode = Guid.NewGuid();
+        //    return validCode.ToString();
+        //}
 
         private string BuildHyperLink(string link)
         {
@@ -90,9 +98,9 @@ namespace Comander.Controllers
         public SmtpClient ConfigureSmtp()
         {
             SmtpClient smtpConfiguration = new SmtpClient();
-            smtpConfiguration.Host = "smtp.gmail.com";
-            smtpConfiguration.Port = 587;
-            smtpConfiguration.Credentials = new NetworkCredential("john.cornishon@gmail.com", "Longinusa2");
+            smtpConfiguration.Host = host;
+            smtpConfiguration.Port = port;
+            smtpConfiguration.Credentials = new NetworkCredential(senderAddress, senderPassword);
             smtpConfiguration.EnableSsl = true;
             
 
@@ -105,8 +113,6 @@ namespace Comander.Controllers
             )
         {
             smtpConfiguration.Send(message);
-            MailMessage mm = new MailMessage();
-            SmtpClient smtpClient = new SmtpClient();
         }
     }
 }

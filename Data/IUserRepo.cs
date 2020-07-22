@@ -1,6 +1,9 @@
 ﻿using Commander.Models;
 using System.Collections.Generic;
 
+
+
+
 namespace Commander.Data
 {
     public interface IUserRepo
@@ -12,6 +15,4 @@ namespace Commander.Data
         bool isUserInDb(UserModel user);
         bool isEmailInDb(UserModel user);
     }
-
-
 }

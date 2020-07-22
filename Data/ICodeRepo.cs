@@ -1,11 +1,16 @@
-﻿using System;
+﻿using Comander.Models;
+using Commander.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Comander.Data
+
+
+
+namespace Commander.Data
 {
-    interface ICodeRepo
+    public interface ICodeRepo
     {
+        public void AddCode(CodeModel code);
+        public bool SaveChanges();
+
     }
 }

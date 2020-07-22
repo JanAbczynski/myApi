@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Net;
 using System.Net.Mail;
+using Comander.Models;
+using Comander.Data;
 
 namespace Comander.Controllers
 {
@@ -29,45 +31,32 @@ namespace Comander.Controllers
     {
         private readonly ICommanderRepo _repository;
         private readonly IUserRepo _repositoryUsers;
+        private readonly ICodeRepo _repositoryCodes;
         private readonly IMapper _mapper;
         private IConfiguration _config;
         SmtpClient cv = new SmtpClient("smtp.gmail.com", 587);
         static string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
 
-
-        public LoginController(IUserRepo repositoryUsers, IMapper mapper, IConfiguration config)
+        public LoginController(IUserRepo repositoryUsers, ICodeRepo repositoryCodes, IMapper mapper, IConfiguration config)
         {
             _repositoryUsers = repositoryUsers;
+            _repositoryCodes = repositoryCodes;
+
             _mapper = mapper;
             _config = config;
         }
 
 
-        [HttpPost]
-        public IActionResult VeryfieEmail(string userLogin)
-        {
-            EmailSender email = new EmailSender();
-            string verificationCode = email.GenerateRawCode();
-            MailMessage message = email.VeryfiEmail("j.abc@wp.pl", verificationCode);
-            SmtpClient smtpConfiguration = email.ConfigureSmtp();
-            
-            email.SendEmail(smtpConfiguration, message);
-
-            return Ok();
-        }
-
 
         [HttpGet]
         public ActionResult getCode(string code)
         {
-            
             var idx = "g";
             var x = 5;
             return Ok();
         }
 
         [HttpPost]
-        //public ActionResult<UserDto> PostLogin(string username, string password)
         public IActionResult PostLogin(UserDto userDto)
         {
             UserModel login = new UserModel();
@@ -181,12 +170,25 @@ namespace Comander.Controllers
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
 
+
             commonModel.UserSalt = saltAsString;
             commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
             _repositoryUsers.Register(commonModel);
             _repositoryUsers.SaveChanges();
             int userId = commonModel.Id;
-            VeryfieEmail(commonModel.UserLogin);
+
+            string rawCode = CodeHandler.GenerateRawCode();
+            DateTime cretionDateUtc = DateTime.UtcNow;
+            DateTime cretionDate = DateTime.Now;
+            DateTime expireDate = cretionDate.AddDays(3);
+            CodeModel codeModel  = CodeHandler.CodeModelCreator(rawCode, commonModel.UserLogin, cretionDate, expireDate);
+            EmailSender email = new EmailSender();
+            email.VeryfiEmail("j.abc@wp.pl", rawCode);
+
+            var code = _mapper.Map<CodeModel>(codeModel);
+            _repositoryCodes.AddCode(code);
+            _repositoryCodes.SaveChanges();
+
             return commonModel;
         }
 
