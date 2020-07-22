@@ -78,6 +78,9 @@ namespace Comander.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("IdC")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserAddress")
                         .HasColumnType("nvarchar(max)");
 

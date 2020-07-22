@@ -170,7 +170,7 @@ namespace Comander.Controllers
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
 
-
+            commonModel.IdC = Guid.NewGuid().ToString();
             commonModel.UserSalt = saltAsString;
             commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
             _repositoryUsers.Register(commonModel);

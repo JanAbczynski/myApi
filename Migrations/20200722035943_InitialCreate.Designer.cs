@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200720200417_InitialCreate")]
+    [Migration("20200722035943_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,6 +79,9 @@ namespace Comander.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("IdC")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserAddress")
                         .HasColumnType("nvarchar(max)");

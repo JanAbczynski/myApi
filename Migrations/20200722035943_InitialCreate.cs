@@ -45,6 +45,7 @@ namespace Comander.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    IdC = table.Column<string>(nullable: true),
                     UserLogin = table.Column<string>(nullable: true),
                     UserPass = table.Column<string>(nullable: true),
                     UserName = table.Column<string>(nullable: true),
