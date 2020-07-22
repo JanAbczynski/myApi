@@ -11,17 +11,20 @@ namespace Comander.Migrations
                 name: "Code",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Idc = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: true),
                     UserLogin = table.Column<string>(nullable: true),
                     Code = table.Column<string>(nullable: true),
                     CreationTime = table.Column<DateTime>(nullable: false),
                     ExpireTime = table.Column<DateTime>(nullable: false),
-                    IsUsed = table.Column<bool>(nullable: false)
+                    TypeOfCode = table.Column<string>(nullable: true),
+                    AdditionalInfo = table.Column<string>(nullable: true),
+                    WasUsed = table.Column<bool>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Code", x => x.Id);
+                    table.PrimaryKey("PK_Code", x => x.Idc);
                 });
 
             migrationBuilder.CreateTable(
@@ -43,9 +46,7 @@ namespace Comander.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdC = table.Column<string>(nullable: true),
+                    Id = table.Column<string>(nullable: false),
                     UserLogin = table.Column<string>(nullable: true),
                     UserPass = table.Column<string>(nullable: true),
                     UserName = table.Column<string>(nullable: true),
@@ -57,7 +58,8 @@ namespace Comander.Migrations
                     UserPhoneNumber = table.Column<string>(nullable: true),
                     UserPhoneNumber2 = table.Column<string>(nullable: true),
                     UserSalt = table.Column<string>(nullable: true),
-                    UserRole = table.Column<string>(nullable: true)
+                    UserRole = table.Column<string>(nullable: true),
+                    Confirmed = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

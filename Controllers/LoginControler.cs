@@ -51,7 +51,13 @@ namespace Comander.Controllers
         [HttpGet]
         public ActionResult getCode(string code)
         {
-            var idx = "g";
+            CodeModel codeModel = _repositoryCodes.GetCodeModelByCode(code);
+            bool codeIsValid = CodeHandler.IsCodeValid(codeModel);
+            if (codeIsValid)
+            {
+                UserModel userModel = _repositoryUsers.GetUserById(codeModel.UserId);
+                
+            }
             var x = 5;
             return Ok();
         }
@@ -170,26 +176,28 @@ namespace Comander.Controllers
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
 
-            commonModel.IdC = Guid.NewGuid().ToString();
+            commonModel.Id = Guid.NewGuid().ToString();
             commonModel.UserSalt = saltAsString;
             commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
+            commonModel.Confirmed = false;
             _repositoryUsers.Register(commonModel);
             _repositoryUsers.SaveChanges();
-            int userId = commonModel.Id;
+            string userId = commonModel.Id;
 
             string rawCode = CodeHandler.GenerateRawCode();
-            DateTime cretionDateUtc = DateTime.UtcNow;
-            DateTime cretionDate = DateTime.Now;
+            DateTime cretionDate = DateTime.UtcNow;
             DateTime expireDate = cretionDate.AddDays(3);
-            CodeModel codeModel  = CodeHandler.CodeModelCreator(rawCode, commonModel.UserLogin, cretionDate, expireDate);
+            TypeOfCode typeOfCode = TypeOfCode.RegistrationCode;
+            CodeModel codeModel  = CodeHandler.CodeModelCreator(rawCode, commonModel, cretionDate, expireDate, typeOfCode);
             EmailSender email = new EmailSender();
-            email.VeryfiEmail("j.abc@wp.pl", rawCode);
 
+            _repositoryCodes.DeactiveCode(commonModel);
+            email.VeryfiEmail(commonModel.UserMail, rawCode);
             var code = _mapper.Map<CodeModel>(codeModel);
             _repositoryCodes.AddCode(code);
             _repositoryCodes.SaveChanges();
 
-            return commonModel;
+            return Ok(commonModel);
         }
 
         private string HashPassword(byte[] salt, string password)

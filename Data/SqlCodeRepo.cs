@@ -28,6 +28,29 @@ namespace Comander.Data
 
         }
 
+        public void DeactiveCode(UserModel user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            try
+            {
+                var x = _context.Code.First(p => p.UserId == user.Id);
+            }catch(Exception e)
+            {
+            }
+            
+
+            
+        }
+
+        public CodeModel GetCodeModelByCode(string code)
+        {
+            CodeModel codeModel = _context.Code.FirstOrDefault(p => p.Code == code);
+
+            return codeModel;
+        }
 
         public bool SaveChanges()
         {

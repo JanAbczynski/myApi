@@ -7,11 +7,15 @@ namespace Comander.Dtos
 {
     public class CodeDto
     {
-        public int Id { get; set; }
+        public string Idc { get; set; }
+        public string UserId { get; set; }
         public string UserLogin { get; set; }
         public string Code { get; set; }
         public DateTime CreationTime { get; set; }
         public DateTime ExpireTime { get; set; }
-        public bool IsUsed { get; set; }
+        public string TypeOfCode { get; set; }
+        public string AdditionalInfo { get; set; }
+        public bool WasUsed { get; set; }
+        public bool IsActive { get; set; }
     }
 }

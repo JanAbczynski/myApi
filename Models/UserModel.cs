@@ -1,10 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Commander.Models
 {
     public class UserModel
     {
-
-        public int Id { get; set; }
-        public string IdC { get; set; }
+        [Key]
+        public string Id { get; set; }
         public string UserLogin { get; set; }
         public string UserPass { get; set; }
         public string UserName { get; set; }
@@ -16,6 +17,7 @@ namespace Commander.Models
         public string UserPhoneNumber { get; set; }
         public string UserPhoneNumber2 { get; set; }
         public string UserSalt { get; set; }
-        public string UserRole {get; set; }
+        public string UserRole { get; set; }
+        public bool Confirmed { get; set; }
     }
 }

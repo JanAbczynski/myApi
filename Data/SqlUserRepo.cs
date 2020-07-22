@@ -16,6 +16,11 @@ namespace Commander.Data
             _context = context;
         }
 
+        public UserModel GetUserById(string id)
+        {
+            return _context.Users.FirstOrDefault(x => x.Id == id);
+        }
+
         public UserModel GetUserByLogin(string login)
         {
             return _context.Users.FirstOrDefault(x => x.UserLogin == login);

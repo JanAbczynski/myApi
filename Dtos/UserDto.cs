@@ -9,7 +9,6 @@ namespace Comander.Dtos
     public class UserDto
     {
         public string Id { get; set; }
-        public string IdC { get; set; }
         public string UserLogin { get; set; }
         public string UserPass { get; set; }
         public string UserName { get; set; }
@@ -22,6 +21,7 @@ namespace Comander.Dtos
         public string UserPhoneNumber2 { get; set; }
         public string UserSalt { get; set; }
         public string UserRole { get; set; }
+        public bool Confirmed { get; set; }
 
     }
 }
