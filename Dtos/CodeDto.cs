@@ -16,6 +16,8 @@ namespace Comander.Dtos
         public string TypeOfCode { get; set; }
         public string AdditionalInfo { get; set; }
         public bool WasUsed { get; set; }
+        public DateTime UsingDate { get; set; }
+        public string CodeBeneficient { get; set; }
         public bool IsActive { get; set; }
     }
 }

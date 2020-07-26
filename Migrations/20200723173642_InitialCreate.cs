@@ -20,6 +20,8 @@ namespace Comander.Migrations
                     TypeOfCode = table.Column<string>(nullable: true),
                     AdditionalInfo = table.Column<string>(nullable: true),
                     WasUsed = table.Column<bool>(nullable: false),
+                    UsingDate = table.Column<DateTime>(nullable: false),
+                    CodeBeneficient = table.Column<string>(nullable: true),
                     IsActive = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>

@@ -19,26 +19,33 @@ namespace Comander.Controllers
         string senderPassword = "Longinusa2";
 
 
-        public bool VeryfiEmail(string to, string code)
+        public bool PrepareEmail(string to, string mailBody, string subject)
         {
-            string subject = CreateSubject();
-            string mailBody = BodyBuilder(code);
             MailMessage messageDetail = BuildMessage(from, to, subject, mailBody);
             SmtpClient smtpConfiguration = ConfigureSmtp();
             SendEmail(smtpConfiguration, messageDetail);
-
             return true;
         }
 
-        private string CreateSubject()
+
+
+
+        public string CreateSubject(MailType mailType)
         {
-            return "temat";
+            string subject = "unxpected email";
+
+            switch (mailType)
+            {
+                case MailType.varyfication:
+                    subject = "Veryfication email";
+                    break;
+                case MailType.recovery:
+                    subject = "Rrecovery email:";
+                    break;
+            }
+            return subject;
         }
 
-        private string CreateBody()
-        {
-            return "xxx";
-        }
 
         private MailMessage BuildMessage(
                                             string from,
@@ -56,13 +63,24 @@ namespace Comander.Controllers
             return message;
         }
 
-        private string BodyBuilder(string code)
+        public string BodyBuilder(string code, MailType mailType)
         {
-            string mailBody;
-            mailBody = $"Hello!<br>" +
-                $"Please click on your validation link:<br> " +
-                $"Validation link: <a href = \"{generalAddress}api/login/getCode?code={code}\">cllick here !!</a><br>" +
-                $"Thank you.";
+            string mailBody = "Unexpecte email";
+            switch (mailType)
+            {
+                case MailType.varyfication:
+                    mailBody = $"Hello!<br>" +
+                        $"Please click on your validation link:<br> " +
+                        $"Validation link: <a href = \"{generalAddress}api/login/ValidateUser?code={code}\">cllick here !!</a><br>" +
+                        $"Thank you.";
+                    break;
+                case MailType.recovery:
+                    mailBody = $"Hello!<br>" +
+                        $"You received this mail because there was request to reset password. To reset password click on this link:<br> " +
+                        $"<a href = \"http://localhost:4200/passChanger?code={code}\">CHANGE PASSWORD</a><br>" +
+                        $"Thank you.";
+                    break;
+            }
             return mailBody;
         }
 

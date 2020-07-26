@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200722213254_InitialCreate")]
+    [Migration("20200723173642_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace Comander.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CodeBeneficient")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
@@ -49,6 +52,9 @@ namespace Comander.Migrations
 
                     b.Property<string>("UserLogin")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UsingDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("WasUsed")
                         .HasColumnType("bit");

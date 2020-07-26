@@ -18,12 +18,20 @@ namespace Commander.Data
 
         public UserModel GetUserById(string id)
         {
-            return _context.Users.FirstOrDefault(x => x.Id == id);
+            var user = _context.Users.FirstOrDefault(x => x.Id == id);
+            return user;
         }
 
         public UserModel GetUserByLogin(string login)
         {
-            return _context.Users.FirstOrDefault(x => x.UserLogin == login);
+            var user = _context.Users.FirstOrDefault(x => x.UserLogin == login);
+            return user;
+        }
+
+        public UserModel GetUserByEmail(string mail)
+        {
+            var user = _context.Users.FirstOrDefault(x => x.UserMail == mail);
+            return user;
         }
 
         public IEnumerable<UserModel> GetUsers()
@@ -55,6 +63,11 @@ namespace Commander.Data
         public bool SaveChanges()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public void UserUpdate(UserModel user)
+        {
+            //no code
         }
     }
 }

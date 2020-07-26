@@ -30,6 +30,9 @@ namespace Comander.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CodeBeneficient")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
@@ -47,6 +50,9 @@ namespace Comander.Migrations
 
                     b.Property<string>("UserLogin")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UsingDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("WasUsed")
                         .HasColumnType("bit");

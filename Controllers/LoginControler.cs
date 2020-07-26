@@ -49,17 +49,53 @@ namespace Comander.Controllers
 
 
         [HttpGet]
-        public ActionResult getCode(string code)
+        public ActionResult ValidateUser(string code)
         {
             CodeModel codeModel = _repositoryCodes.GetCodeModelByCode(code);
             bool codeIsValid = CodeHandler.IsCodeValid(codeModel);
             if (codeIsValid)
             {
                 UserModel userModel = _repositoryUsers.GetUserById(codeModel.UserId);
-                
+                UserModel userModelToSave = new UserModel();
+                userModel.Confirmed = true;
+                userModelToSave = userModel;
+                ChangeUserData(userModelToSave, userModel);
+
+                CodeModel usedCode = new CodeModel();
+                CodeModel CodeModelToSave = new CodeModel();
+                usedCode = _repositoryCodes.GetCodeModelByCode(code);
+                CodeModelToSave = usedCode;
+                CodeModelToSave.IsActive = false;
+                CodeModelToSave.WasUsed = true;
+                CodeModelToSave.CodeBeneficient = userModel.Id;
+                CodeModelToSave.UsingDate = DateTime.UtcNow;
+                ChangeCodeData(CodeModelToSave, usedCode);
             }
-            var x = 5;
+            
             return Ok();
+        }
+
+
+        [HttpPost]
+        public ActionResult TryToChangePass(CodeModel codeModel)
+        {
+            var response = Ok(new { key = "MyValue" });
+   
+
+            return Ok(response);
+        }
+
+
+        private void ChangeUserData(UserModel newUserData, UserModel oldUserData)
+        {
+                _mapper.Map(newUserData, oldUserData);
+                _repositoryUsers.SaveChanges();
+        }
+
+        private void ChangeCodeData(CodeModel newCodeData, CodeModel oldCodeData)
+        {
+            _mapper.Map(newCodeData, oldCodeData);
+            _repositoryUsers.SaveChanges();
         }
 
         [HttpPost]
@@ -77,11 +113,30 @@ namespace Comander.Controllers
             var user = AuthenticateUser(login);
             if (user != null)
             {
-                var tokenStr = GenerateJSOWebToken(user);
+                string tokenStr = GenerateJSOWebToken(user);
                 response = Ok(new { token = tokenStr });
             }
             return response;
         }
+
+        [HttpPost]
+        public ActionResult PasswordReminderRequest(UserModel userModel)
+        {
+            String response;
+            var user = _repositoryUsers.GetUserByEmail(userModel.UserMail);
+            if (user == null)
+            {
+                response = "no";
+                return NotFound();
+            }
+            response = "yes";
+
+            MailOperator(user, MailType.recovery);
+
+            return Ok();
+        }
+
+
 
         [HttpPost]
         public IActionResult GetUsersData(UserToken token)
@@ -103,7 +158,10 @@ namespace Comander.Controllers
         private UserModel AuthenticateUser(UserModel login)
         {
             UserModel user = null;
-            var DbUser = _repositoryUsers.GetUserByLogin(login.UserLogin);
+            UserModel DbUser = null;
+            DbUser = _repositoryUsers.GetUserByLogin(login.UserLogin);
+
+            var x = 5;
             var saltAsString = DbUser.UserSalt;
             var saltAsByte = Encoding.UTF8.GetBytes(saltAsString);
             login.UserPass = HashPassword(saltAsByte, login.UserPass);
@@ -121,24 +179,19 @@ namespace Comander.Controllers
         private string GenerateJSOWebToken(UserModel userInfo) {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var creditentals = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userInfo.UserLogin),
                 new Claim(JwtRegisteredClaimNames.Email, userInfo.UserMail),
-                //new Claim(JwtRegisteredClaimNames.UniqueName, userInfo.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("role", userInfo.UserRole)
             };
-
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Issuer"],
                 claims,
                 expires: DateTime.Now.AddMinutes(1),
                 signingCredentials: creditentals);
-
             var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
             return encodetoken;
         }
@@ -182,24 +235,37 @@ namespace Comander.Controllers
             commonModel.Confirmed = false;
             _repositoryUsers.Register(commonModel);
             _repositoryUsers.SaveChanges();
-            string userId = commonModel.Id;
-
-            string rawCode = CodeHandler.GenerateRawCode();
-            DateTime cretionDate = DateTime.UtcNow;
-            DateTime expireDate = cretionDate.AddDays(3);
-            TypeOfCode typeOfCode = TypeOfCode.RegistrationCode;
-            CodeModel codeModel  = CodeHandler.CodeModelCreator(rawCode, commonModel, cretionDate, expireDate, typeOfCode);
-            EmailSender email = new EmailSender();
-
-            _repositoryCodes.DeactiveCode(commonModel);
-            email.VeryfiEmail(commonModel.UserMail, rawCode);
-            var code = _mapper.Map<CodeModel>(codeModel);
-            _repositoryCodes.AddCode(code);
-            _repositoryCodes.SaveChanges();
+            //string userId = commonModel.Id;
+            
+            MailOperator(commonModel, MailType.varyfication);
 
             return Ok(commonModel);
         }
 
+
+        private bool MailOperator(UserModel userReciever, MailType mailType)
+        {
+
+            string rawCode = CodeHandler.GenerateRawCode();
+            DateTime cretionDate = DateTime.UtcNow;
+            DateTime expireDate = CodeHandler.SetExpireDate(cretionDate, mailType);
+            TypeOfCode typeOfCode = TypeOfCode.RegistrationCode;
+            CodeModel codeModel = CodeHandler.CodeModelCreator(rawCode, userReciever, cretionDate, expireDate, mailType);
+            EmailSender email = new EmailSender();
+            string mailBody = email.BodyBuilder(rawCode, mailType);
+            string mailSubject = email.CreateSubject(mailType);
+
+            _repositoryCodes.DeactiveCode(userReciever);
+            email.PrepareEmail(userReciever.UserMail, mailBody, mailSubject);
+            var code = _mapper.Map<CodeModel>(codeModel);
+
+            _repositoryCodes.AddCode(code);
+            _repositoryCodes.SaveChanges();
+
+            return true;
+        }
+
+         
         private string HashPassword(byte[] salt, string password)
         {
             byte[] passAsByte = Encoding.ASCII.GetBytes(password);
@@ -250,5 +316,11 @@ namespace Comander.Controllers
     {
          public string tokenCode { get; set; }
     } 
+
+    public enum MailType
+    {
+        varyfication,
+        recovery
+    }
 }
 
