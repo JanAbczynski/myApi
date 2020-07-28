@@ -52,7 +52,7 @@ namespace Comander.Controllers
         public ActionResult ValidateUser(string code)
         {
             CodeModel codeModel = _repositoryCodes.GetCodeModelByCode(code);
-            bool codeIsValid = CodeHandler.IsCodeValid(codeModel);
+            bool codeIsValid = CodeHandler.IsCodeValid(codeModel, MailType.varyfication);
             if (codeIsValid)
             {
                 UserModel userModel = _repositoryUsers.GetUserById(codeModel.UserId);
@@ -78,11 +78,32 @@ namespace Comander.Controllers
 
         [HttpPost]
         public ActionResult TryToChangePass(CodeModel codeModel)
+        
+        
         {
-            var response = Ok(new { key = "MyValue" });
-   
+            CodeModel recoveryCode = _repositoryCodes.GetCodeModelByCode(codeModel.Code);
 
-            return Ok(response);
+            if (!CodeHandler.IsCodeValid(recoveryCode, MailType.recovery))
+            {
+                return Ok(new { status = false, codeForChange = "dupcia" });
+            }
+
+            UserModel user = _repositoryUsers.GetUserById(recoveryCode.UserId);
+            string rawCode = CodeHandler.GenerateRawCode(5);
+            DateTime creationDate = DateTime.UtcNow;
+            DateTime expireDate = creationDate.AddMinutes(10);
+            CodeModel changerCode = CodeHandler.CodeModelCreator(rawCode, user, creationDate, expireDate, MailType.changePassword);
+
+            //_repositoryCodes.AddCode(changerCode);
+            //_repositoryCodes.SaveChanges();
+
+            CodeModel usedCode = recoveryCode;
+            usedCode.WasUsed = true;
+            usedCode.IsActive = false;
+            usedCode.CodeBeneficient = user.Id;
+            ChangeCodeData(usedCode, recoveryCode);
+            
+            return Ok(new { status = true, codeForChange = rawCode});
         }
 
 
@@ -105,8 +126,8 @@ namespace Comander.Controllers
             var loginDatas = _mapper.Map<UserModel>(userDto);
             login.UserLogin = loginDatas.UserLogin;
             login.UserPass = loginDatas.UserPass;
-            login.Id = loginDatas.Id;
-            login.UserRole = "user";
+            //login.Id = loginDatas.Id;
+            //login.UserRole = "user";
 
             IActionResult response = Unauthorized();
 
@@ -136,6 +157,51 @@ namespace Comander.Controllers
             return Ok();
         }
 
+
+        [HttpPost]
+        public ActionResult PassChanger(TempModel passedModel)
+        {
+            string code = passedModel.code;
+            CodeModel codeAsModel = _repositoryCodes.GetCodeModelByCode(code);
+            if (CodeHandler.IsCodeValid(codeAsModel, MailType.changePassword))
+            {
+                return NotFound();
+            }
+            UserModel userWithOldPass = _repositoryUsers.GetUserById(codeAsModel.UserId);
+            UserModel userWithNewPass = userWithOldPass;
+
+            var saltAsByte = GetSalt();
+            var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
+            userWithNewPass.UserSalt = saltAsString;
+            userWithNewPass.UserPass = HashPassword(saltAsByte, passedModel.userPass);
+
+            ChangeUserData(userWithNewPass, userWithOldPass);
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult PassChanger2 (TempModel passedModel)
+        {
+            UserModel login = new UserModel();
+            string token = passedModel.token;
+            GetUserFromToken(token);
+  
+            return Ok();
+        }
+
+
+        private void GetUserFromToken(string userToken)
+        {
+            var jwt = userToken;
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwt);
+            //foreach(var data in token)
+            //{
+            //    var x = data;
+            //}
+        }
 
 
         [HttpPost]
@@ -228,11 +294,11 @@ namespace Comander.Controllers
 
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
-
             commonModel.Id = Guid.NewGuid().ToString();
             commonModel.UserSalt = saltAsString;
             commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
             commonModel.Confirmed = false;
+
             _repositoryUsers.Register(commonModel);
             _repositoryUsers.SaveChanges();
             //string userId = commonModel.Id;
@@ -314,13 +380,15 @@ namespace Comander.Controllers
 
     public class UserToken
     {
-         public string tokenCode { get; set; }
+        public string tokenCode { get; set; }
+        public string Subject { get; set; }
     } 
 
     public enum MailType
     {
         varyfication,
-        recovery
+        recovery,
+        changePassword
     }
 }
 

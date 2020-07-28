@@ -9,6 +9,7 @@ namespace Comander.Controllers
 {
     public static class CodeHandler
     {
+        static string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
         public static CodeModel CodeModelCreator(string rawCode, UserModel userModel, DateTime creationDate, DateTime expireDate, MailType typeOfCode)
         {
             CodeModel userCode = new CodeModel();
@@ -39,24 +40,37 @@ namespace Comander.Controllers
             return expireDate;
         }
 
-        public static string GenerateRawCode()
+        public static string GenerateRawCode(int? additionalLength = 0)
         {
+            Random random = new Random(characters.Length);
+            string additionalCode = "X";
+            for(int i = 0; i < additionalLength; i++)
+            {
+                
+            }
             Guid validCode = Guid.NewGuid();
-            return validCode.ToString();
+            return validCode.ToString() + additionalCode;
         }
 
-        public static bool IsCodeValid(CodeModel codeModel)
+        public static bool IsCodeValid(CodeModel codeModel, MailType type)
         {
             DateTime now = DateTime.UtcNow;
             if (codeModel.WasUsed || !codeModel.IsActive)
             {
                 return false;
             }
-            
+
             if (codeModel.ExpireTime <= now)
             {
                 return false;
             }
+
+            if (codeModel.TypeOfCode != type.ToString())
+            {
+                return false;
+            }
+
+
 
 
             return true;
