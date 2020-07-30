@@ -52,6 +52,16 @@ namespace Comander.Controllers
             return validCode.ToString() + additionalCode;
         }
 
+        public static CodeModel DeactivateCode(CodeModel codeToDeactivate, UserModel beneficient=null)
+        {
+            CodeModel usedCode = codeToDeactivate;
+            usedCode.WasUsed = true;
+            usedCode.IsActive = false;
+            usedCode.CodeBeneficient = beneficient.Id;
+
+            return usedCode;
+        }
+
         public static bool IsCodeValid(CodeModel codeModel, MailType type)
         {
             DateTime now = DateTime.UtcNow;
@@ -59,20 +69,14 @@ namespace Comander.Controllers
             {
                 return false;
             }
-
             if (codeModel.ExpireTime <= now)
             {
                 return false;
             }
-
             if (codeModel.TypeOfCode != type.ToString())
             {
                 return false;
             }
-
-
-
-
             return true;
         }
     }
