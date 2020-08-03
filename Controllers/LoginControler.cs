@@ -47,6 +47,16 @@ namespace Comander.Controllers
         }
 
 
+        //[Authorize(Policy = "company")]
+        [HttpGet]
+        public ActionResult test()
+        {
+            var x = 5;
+
+            return Ok();
+        }
+
+
 
         [HttpGet]
         public ActionResult ValidateUser(string code)
@@ -200,12 +210,6 @@ namespace Comander.Controllers
         }
 
 
-        private void GetUserFromToken(string userToken)
-        {
-            var jwt = userToken;
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
-        }
 
 
         [HttpPost]
@@ -247,13 +251,14 @@ namespace Comander.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, userInfo.UserLogin),
                 new Claim(JwtRegisteredClaimNames.Email, userInfo.UserMail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("userType", userInfo.UserType),
                 new Claim("role", userInfo.UserRole)
             };
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMinutes(1),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: creditentals);
             var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
             return encodetoken;
@@ -288,7 +293,7 @@ namespace Comander.Controllers
             {
                 return NotFound("e-mail is not unique");
             }
-
+            commonModel = NullNotNeccessary(commonModel);
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
             commonModel.Id = Guid.NewGuid().ToString();
@@ -304,6 +309,21 @@ namespace Comander.Controllers
             return Ok(commonModel);
         }
 
+        private UserModel NullNotNeccessary (UserModel user)
+        {
+            UserModel newuser = user;
+            switch (user.UserType)
+            {
+                case "person":
+                    user.UserTaxNumber = null;
+                    break;
+                case "company":
+                    user.UserSureName = null;
+                    break;
+            }
+
+            return user;
+        }
 
         private bool MailOperator(UserModel userReciever, MailType mailType)
         {
@@ -379,6 +399,11 @@ namespace Comander.Controllers
         public string Subject { get; set; }
     } 
 
+    public enum UserType
+    {
+        person,
+        company
+    }
     public enum MailType
     {
         varyfication,

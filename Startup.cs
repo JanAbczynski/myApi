@@ -77,12 +77,19 @@ namespace Comander
 
             services.AddMvc();
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("company", policy =>
+                policy.RequireClaim("userType", "company"));
+            }         
+            );
 
-            // services.AddScoped<ICommanderRepo, MockCommanderRepo>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IUserRepo, SqlUserRepo>();
             services.AddScoped<ICodeRepo, SqlCodeRepo>();
+            services.AddScoped<IRunRepo, SqlRunRepo>();
+            services.AddScoped<ICompetitionRepo, SqlCompetitionRepo>();
             services.AddScoped<ICommanderRepo, SqlCommanderRepo>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

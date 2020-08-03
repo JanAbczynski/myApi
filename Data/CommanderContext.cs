@@ -14,6 +14,8 @@ namespace Commander.Data
         public DbSet<Command> Commands { get; set; }
         public DbSet<UserModel> Users { get; set; }
         public DbSet<CodeModel> Code { get; set; }
+        public DbSet<RunModel> Run { get; set; }
+        public DbSet<CompetitionModel> Competition { get; set; }
     }
 
 }

@@ -45,14 +45,44 @@ namespace Comander.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Competition",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    description = table.Column<string>(nullable: true),
+                    startDate = table.Column<DateTime>(nullable: false),
+                    duration = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Competition", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Run",
+                columns: table => new
+                {
+                    id = table.Column<string>(nullable: false),
+                    descriptiion = table.Column<string>(nullable: true),
+                    target = table.Column<string>(nullable: true),
+                    noOfShots = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Run", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    UserType = table.Column<string>(nullable: true),
                     UserLogin = table.Column<string>(nullable: true),
                     UserPass = table.Column<string>(nullable: true),
                     UserName = table.Column<string>(nullable: true),
                     UserSureName = table.Column<string>(nullable: true),
+                    UserTaxNumber = table.Column<string>(nullable: true),
                     UserAddress = table.Column<string>(nullable: true),
                     UserCity = table.Column<string>(nullable: true),
                     UserZipCode = table.Column<string>(nullable: true),
@@ -76,6 +106,12 @@ namespace Comander.Migrations
 
             migrationBuilder.DropTable(
                 name: "Commands");
+
+            migrationBuilder.DropTable(
+                name: "Competition");
+
+            migrationBuilder.DropTable(
+                name: "Run");
 
             migrationBuilder.DropTable(
                 name: "Users");

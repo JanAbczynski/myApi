@@ -62,6 +62,44 @@ namespace Comander.Migrations
                     b.ToTable("Code");
                 });
 
+            modelBuilder.Entity("Comander.Models.CompetitionModel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("duration")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("startDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Competition");
+                });
+
+            modelBuilder.Entity("Comander.Models.RunModel", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("descriptiion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("noOfShots")
+                        .HasColumnType("int");
+
+                    b.Property<string>("target")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Run");
+                });
+
             modelBuilder.Entity("Commander.Models.Command", b =>
                 {
                     b.Property<int>("Id")
@@ -126,6 +164,12 @@ namespace Comander.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserSureName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserTaxNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserZipCode")
