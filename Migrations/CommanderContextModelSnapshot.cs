@@ -73,7 +73,10 @@ namespace Comander.Migrations
                     b.Property<DateTime>("duration")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("startDate")
+                    b.Property<string>("placeOf")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("startTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

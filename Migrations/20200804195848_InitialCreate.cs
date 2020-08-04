@@ -50,8 +50,9 @@ namespace Comander.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     description = table.Column<string>(nullable: true),
-                    startDate = table.Column<DateTime>(nullable: false),
-                    duration = table.Column<DateTime>(nullable: false)
+                    startTime = table.Column<DateTime>(nullable: false),
+                    duration = table.Column<DateTime>(nullable: false),
+                    placeOf = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

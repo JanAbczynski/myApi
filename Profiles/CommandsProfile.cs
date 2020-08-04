@@ -20,6 +20,9 @@ namespace Commander.Profiles
 
             CreateMap<CodeModel, CodeDto>();
             CreateMap<CodeDto, CodeModel>();
+
+            CreateMap<CompetitionModel, CompetitionDto>();
+            CreateMap<CompetitionDto, CompetitionModel>();
         }
     }
 

@@ -1,20 +1,19 @@
-﻿using System;
+﻿using Comander.Models;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Comander.Models
+namespace Comander.Dtos
 {
-    public class CompetitionModel
+    public class CompetitionDto
     {
-        [Key]
+
         public string Id { get; set; }
         public string description { get; set; }
         //public RunModel[] runs { get; set; }
         public DateTime startTime { get; set; }
         public DateTime duration { get; set; }
         public string placeOf { get; set; }
-
     }
 }
