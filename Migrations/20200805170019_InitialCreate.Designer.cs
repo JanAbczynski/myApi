@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200804195848_InitialCreate")]
+    [Migration("20200805170019_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,9 @@ namespace Comander.Migrations
 
                     b.Property<DateTime>("duration")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ownerId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("placeOf")
                         .HasColumnType("nvarchar(max)");

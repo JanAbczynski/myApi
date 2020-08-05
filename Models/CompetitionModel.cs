@@ -10,6 +10,7 @@ namespace Comander.Models
     {
         [Key]
         public string Id { get; set; }
+        public string ownerId { get; set; }
         public string description { get; set; }
         //public RunModel[] runs { get; set; }
         public DateTime startTime { get; set; }

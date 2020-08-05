@@ -49,6 +49,7 @@ namespace Comander.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    ownerId = table.Column<string>(nullable: true),
                     description = table.Column<string>(nullable: true),
                     startTime = table.Column<DateTime>(nullable: false),
                     duration = table.Column<DateTime>(nullable: false),

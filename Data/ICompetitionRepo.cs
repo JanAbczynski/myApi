@@ -11,6 +11,7 @@ namespace Comander.Data
         bool SaveChanges();
         IEnumerable<CompetitionModel> GetCompetition();
         IEnumerable<CompetitionModel> GetAllCompetition();
+        IEnumerable<CompetitionModel> GetAllCompetitionForUser(string ownerId);
         CompetitionModel GetCompetitionById(string id);
         void Register(CompetitionModel competition);
         bool isCompetitionInDb(CompetitionModel competition);

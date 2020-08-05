@@ -24,7 +24,15 @@ namespace Comander.Data
 
         public IEnumerable<CompetitionModel> GetAllCompetition()
         {
-            return _context.Competition.ToList();
+            var x = _context.Competition.ToList();
+            return x;
+        }
+
+        public IEnumerable<CompetitionModel> GetAllCompetitionForUser(string ownerId)
+        {
+            var x = _context.Competition.Where(p => p.ownerId == ownerId);
+
+            return x;
         }
 
         public IEnumerable<CompetitionModel> GetCompetition()
