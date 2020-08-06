@@ -23,6 +23,9 @@ namespace Commander.Profiles
 
             CreateMap<CompetitionModel, CompetitionDto>();
             CreateMap<CompetitionDto, CompetitionModel>();
+
+            CreateMap<RunModel, RunDto>();
+            CreateMap<RunDto, RunModel>();
         }
     }
 

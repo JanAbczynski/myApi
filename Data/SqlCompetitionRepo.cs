@@ -30,9 +30,7 @@ namespace Comander.Data
 
         public IEnumerable<CompetitionModel> GetAllCompetitionForUser(string ownerId)
         {
-            var x = _context.Competition.Where(p => p.ownerId == ownerId);
-
-            return x;
+            return _context.Competition.Where(p => p.ownerId == ownerId);
         }
 
         public IEnumerable<CompetitionModel> GetCompetition()

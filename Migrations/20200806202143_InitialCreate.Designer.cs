@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200805170019_InitialCreate")]
+    [Migration("20200806202143_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,19 +91,25 @@ namespace Comander.Migrations
 
             modelBuilder.Entity("Comander.Models.RunModel", b =>
                 {
-                    b.Property<string>("id")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("descriptiion")
+                    b.Property<string>("competitionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("noOfShots")
                         .HasColumnType("int");
 
+                    b.Property<string>("ownerId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("target")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("Run");
                 });

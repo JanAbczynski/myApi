@@ -89,19 +89,25 @@ namespace Comander.Migrations
 
             modelBuilder.Entity("Comander.Models.RunModel", b =>
                 {
-                    b.Property<string>("id")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("descriptiion")
+                    b.Property<string>("competitionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("noOfShots")
                         .HasColumnType("int");
 
+                    b.Property<string>("ownerId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("target")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("Run");
                 });

@@ -64,14 +64,16 @@ namespace Comander.Migrations
                 name: "Run",
                 columns: table => new
                 {
-                    id = table.Column<string>(nullable: false),
-                    descriptiion = table.Column<string>(nullable: true),
+                    Id = table.Column<string>(nullable: false),
+                    competitionId = table.Column<string>(nullable: true),
+                    ownerId = table.Column<string>(nullable: true),
+                    description = table.Column<string>(nullable: true),
                     target = table.Column<string>(nullable: true),
                     noOfShots = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Run", x => x.id);
+                    table.PrimaryKey("PK_Run", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
