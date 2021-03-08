@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Comander.Migrations
 {
     [DbContext(typeof(CommanderContext))]
-    [Migration("20200806202143_InitialCreate")]
+    [Migration("20210308221336_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,22 @@ namespace Comander.Migrations
                     b.ToTable("Run");
                 });
 
+            modelBuilder.Entity("Comander.Models.ShooterModel", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("runId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("shooterId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("ShootersAtRun");
+                });
+
             modelBuilder.Entity("Commander.Models.Command", b =>
                 {
                     b.Property<int>("Id")
@@ -146,6 +162,9 @@ namespace Comander.Migrations
 
                     b.Property<bool>("Confirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("PasswordToChange")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserAddress")
                         .HasColumnType("nvarchar(max)");

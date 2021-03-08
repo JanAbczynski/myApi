@@ -20,6 +20,9 @@ using System.Net;
 using System.Net.Mail;
 using Comander.Models;
 using Comander.Data;
+using System.Data;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace Comander.Controllers
 {
@@ -47,63 +50,73 @@ namespace Comander.Controllers
         }
 
 
-        //[Authorize(Policy = "company")]
-        [HttpGet]
-        public ActionResult test()
-        {
-            var x = 5;
-
-            return Ok();
-        }
-
-
 
         [HttpGet]
         public ActionResult ValidateUser(string code)
         {
-            CodeModel codeModel = _repositoryCodes.GetCodeModelByCode(code);
-            bool codeIsValid = CodeHandler.IsCodeValid(codeModel, MailType.varyfication);
-            if (codeIsValid)
+
+            string sqlProc = "exec dbo.ValidateUser";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@Code", code}
+            };
+            DbHandler dbHandler = new DbHandler();
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            try
             {
-                UserModel userModel = _repositoryUsers.GetUserById(codeModel.UserId);
-                UserModel userModelToSave = new UserModel();
-                userModel.Confirmed = true;
-                userModelToSave = userModel;
-                ChangeUserData(userModelToSave, userModel);
-
-                CodeModel usedCode = _repositoryCodes.GetCodeModelByCode(code);
-                CodeModel CodeModelToSave = CodeHandler.DeactivateCode(usedCode, userModel);
-
-                ChangeCodeData(CodeModelToSave, usedCode);
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                return Ok(new { Result = "Confirmation ok" });
+            }
+            catch(Exception e)
+            {
+                return Conflict(new { Result = "Code is not good" });
             }
             
-            return Ok();
+
+
+
+
+            //CodeModel codeModel = _repositoryCodes.GetCodeModelByCode(code);
+            //bool codeIsValid = CodeHandler.IsCodeValid(codeModel, MailType.varyfication);
+            //if (codeIsValid)
+            //{
+            //    UserModel userModel = _repositoryUsers.GetUserById(codeModel.UserId);
+            //    UserModel userModelToSave = new UserModel();
+            //    userModel.Confirmed = true;
+            //    userModelToSave = userModel;
+            //    ChangeUserData(userModelToSave, userModel);
+
+            //    CodeModel usedCode = _repositoryCodes.GetCodeModelByCode(code);
+            //    CodeModel CodeModelToSave = CodeHandler.DeactivateCode(usedCode, userModel);
+
+            //    ChangeCodeData(CodeModelToSave, usedCode);
+            //}
+
         }
 
 
-        [HttpPost]
-        public ActionResult TryToChangePass(CodeModel codeModel)      
-        {
-            CodeModel recoveryCode = _repositoryCodes.GetCodeModelByCode(codeModel.Code);
+        //[HttpPost]
+        //public ActionResult TryToChangePass(CodeModel codeModel)      
+        //{
+        //    CodeModel recoveryCode = _repositoryCodes.GetCodeModelByCode(codeModel.Code);
 
-            if (!CodeHandler.IsCodeValid(recoveryCode, MailType.recovery))
-            {
-                return Unauthorized();
-            }
+        //    if (!CodeHandler.IsCodeValid(recoveryCode, MailType.recovery))
+        //    {
+        //        return Unauthorized();
+        //    }
 
-            UserModel user = _repositoryUsers.GetUserById(recoveryCode.UserId);
-            string rawCode = CodeHandler.GenerateRawCode(5);
-            DateTime creationDate = DateTime.UtcNow;
-            DateTime expireDate = creationDate.AddMinutes(10);
-            CodeModel changerCode = CodeHandler.CodeModelCreator(rawCode, user, creationDate, expireDate, MailType.changePassword);
-            _repositoryCodes.AddCode(changerCode);
-            _repositoryCodes.SaveChanges();
+        //    UserModel user = _repositoryUsers.GetUserById(recoveryCode.UserId);
+        //    string rawCode = CodeHandler.GenerateRawCode(5);
+        //    DateTime creationDate = DateTime.UtcNow;
+        //    DateTime expireDate = creationDate.AddMinutes(10);
+        //    CodeModel changerCode = CodeHandler.CodeModelCreator(rawCode, user, creationDate, expireDate, MailType.changePassword);
+        //    _repositoryCodes.AddCode(changerCode);
+        //    _repositoryCodes.SaveChanges();
 
-            CodeModel usedCode = CodeHandler.DeactivateCode(recoveryCode, user);
-            ChangeCodeData(usedCode, recoveryCode);
+        //    CodeModel usedCode = CodeHandler.DeactivateCode(recoveryCode, user);
+        //    ChangeCodeData(usedCode, recoveryCode);
             
-            return Ok(new { status = true, codeForChange = rawCode});
-        }
+        //    return Ok(new { status = true, codeForChange = rawCode});
+        //}
 
 
         private void ChangeUserData(UserModel newUserData, UserModel oldUserData)
@@ -112,11 +125,11 @@ namespace Comander.Controllers
                 _repositoryUsers.SaveChanges();
         }
 
-        private void ChangeCodeData(CodeModel newCodeData, CodeModel oldCodeData)
-        {
-            _mapper.Map(newCodeData, oldCodeData);
-            _repositoryUsers.SaveChanges();
-        }
+        //private void ChangeCodeData(CodeModel newCodeData, CodeModel oldCodeData)
+        //{
+        //    _mapper.Map(newCodeData, oldCodeData);
+        //    _repositoryUsers.SaveChanges();
+        //}
 
         [HttpPost]
         public IActionResult PostLogin(UserDto userDto)
@@ -145,36 +158,132 @@ namespace Comander.Controllers
         }
 
         [HttpPost]
-        public ActionResult PasswordReminderRequest(UserModel userModel)
+        public ActionResult RemindPassword(UserModel userModel)
         {
-            String response;
-            var user = _repositoryUsers.GetUserByEmail(userModel.UserMail);
-            if (user == null)
+            string code = "";
+            string sqlProc = "exec dbo.StartRecoverPass";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@UserMail", userModel.UserMail}
+            };
+            DbHandler dbHandler = new DbHandler();
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            try
             {
-                response = "no";
-                return NotFound();
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                foreach (DataRow row in dataSet.Tables["tab"].Rows)
+                {
+                    code = row["Code"].ToString();
+                    MailOperator(userModel, MailType.recovery, code);
+                }
             }
-            response = "yes";
+            catch (Exception e)
+            {
 
-            MailOperator(user, MailType.recovery);
+            }
+
+
 
             return Ok();
         }
 
+        [Authorize]
+        [HttpPost]
+        public ActionResult PassChangerFromPanel(TempModel passedModel)
+        {
+            UserModel userModel = GetUserInfoFromToken(passedModel.token);
+            userModel.UserPass = passedModel.oldPass;
+            userModel.PasswordToChange = passedModel.userPass;
+            userModel.UserSalt = GetBasicLoginDataFromDb(userModel.UserLogin).UserSalt;
+            userModel = AuthenticateUser(userModel);
+
+            string sqlProc = "exec dbo.UpdateUserData";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@UserType",UserType.person.ToString()},
+                      { "@UserLogin",userModel.UserLogin },
+                      { "@UserPass",userModel.UserPass},
+                      { "@UserName",userModel.UserName},
+                      { "@UserSureName",userModel.UserSureName},
+                      { "@UserTaxNumber",userModel.UserTaxNumber},
+                      { "@UserAddress",userModel.UserAddress},
+                      { "@UserCity",userModel.UserCity},
+                      { "@UserZipCode",userModel.UserZipCode},
+                      { "@UserMail",userModel.UserMail},
+                      { "@UserPhoneNumber",userModel.UserPhoneNumber},
+                      { "@UserPhoneNumber2",userModel.UserPhoneNumber2},
+                      { "@UserSalt",userModel.UserSalt},
+                      { "@UserRole","user"},
+                      { "@Confirmed", false.ToString()}
+            };
+            DbHandler dbHandler = new DbHandler();
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+
+            dbHandler.GenerateProcedure(sqlProc, queryParams);
+            return Ok();
+        }
+
+
+
+        private UserModel GetBasicLoginDataFromDb(string login)
+        {
+            UserModel userModel = new UserModel();
+            string saltFromDb = "";
+            string sqlProc = "SELECT UserSalt, UserPass, UserLogin, UserMail, UserType, UserRole FROM Users WHERE UserLogin = @UserLogin";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@UserLogin", login }
+            };
+            DbHandler dbHandler = new DbHandler();
+            try
+            {
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                foreach (DataRow row in dataSet.Tables["tab"].Rows)
+                {
+                    userModel.UserSalt = row["UserSalt"].ToString();
+                    userModel.UserPass = row["UserPass"].ToString();
+                    userModel.UserLogin = row["UserLogin"].ToString();
+                    userModel.UserMail = row["UserMail"].ToString();
+                    userModel.UserType = row["UserType"].ToString();
+                    userModel.UserRole = row["UserRole"].ToString();
+                }
+            }catch(Exception e)
+            {
+
+            }
+            return userModel;
+        }
 
         [HttpPost]
         public ActionResult PassChanger(TempModel passedModel)
         {
-            string code = passedModel.code;
-            CodeModel codeAsModel = _repositoryCodes.GetCodeModelByCode(code);
-            if (CodeHandler.IsCodeValid(codeAsModel, MailType.changePassword))
+            var saltAsByte = GetSalt();
+            var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
+            var hashedPassword = HashPassword(saltAsByte, passedModel.userPass);
+
+            string sqlProc = "exec dbo.ChangeUserPassword";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@NewPassword",hashedPassword},
+                      { "@Code",passedModel.code },
+                      { "@Salt",saltAsString }
+            };
+            DbHandler dbHandler = new DbHandler();
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            try
             {
-                return NotFound();
+                UserModel userModel = new UserModel();
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                foreach (DataRow row in dataSet.Tables["tab"].Rows)
+                {
+                    userModel.UserMail = row["UserMail"].ToString();
+                    userModel.UserLogin = row["UserLogin"].ToString();
+
+                    MailOperator(userModel, MailType.changePassConfirmation);
+                }
+                    
+                return Ok();
             }
-            UserModel userWithOldPass = _repositoryUsers.GetUserById(codeAsModel.UserId);
-            FinallyChangePass(userWithOldPass, passedModel.userPass);
-       
-            return Ok();
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
         }
 
         [Authorize]
@@ -209,8 +318,19 @@ namespace Comander.Controllers
             return Ok();
         }
 
+        private UserModel GetUserInfoFromToken(string code)
+        {
+            UserModel userModel = new UserModel();
+            var jwt = code;
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenDecoded = tokenHandler.ReadJwtToken(jwt);
+            userModel.UserLogin = tokenDecoded.Subject;
+            userModel.UserMail = tokenDecoded.Claims.FirstOrDefault(x => x.Type == "email").Value;
+            userModel.UserType = tokenDecoded.Claims.FirstOrDefault(x => x.Type == "userType").Value;
+            userModel.UserRole = tokenDecoded.Claims.FirstOrDefault(x => x.Type == "role").Value;
 
-
+            return userModel;
+        }
 
         [HttpPost]
         public IActionResult GetUsersData(UserToken token)
@@ -229,18 +349,19 @@ namespace Comander.Controllers
 
         private UserModel AuthenticateUser(UserModel login)
         {
-            UserModel user = null;
-            UserModel DbUser = null;
-            DbUser = _repositoryUsers.GetUserByLogin(login.UserLogin);
-
-            var saltAsString = DbUser.UserSalt;
-            var saltAsByte = Encoding.UTF8.GetBytes(saltAsString);
+            UserModel userLoginDataFromDb = null;
+            userLoginDataFromDb = GetBasicLoginDataFromDb(login.UserLogin);
+            var saltAsByte = Encoding.UTF8.GetBytes(userLoginDataFromDb.UserSalt);
             login.UserPass = HashPassword(saltAsByte, login.UserPass);
-            if (login.UserLogin.ToUpper() == DbUser.UserLogin.ToUpper() && login.UserPass == DbUser.UserPass) {
-                user = DbUser;
+            if (login.UserPass == userLoginDataFromDb.UserPass)
+            {
+                return userLoginDataFromDb ;
             }
-
-            return user;
+            else
+            {
+                userLoginDataFromDb = null;
+                return userLoginDataFromDb;
+            }
         }
 
         private string GenerateJSOWebToken(UserModel userInfo) {
@@ -283,70 +404,71 @@ namespace Comander.Controllers
         [HttpPost]
         public ActionResult<UserModel> RegisterNewUser(UserDto userDto)
         {
-            userDto.UserRole = "user";
-            var commonModel = _mapper.Map<UserModel>(userDto);
-            if (!isLoginUnique(commonModel))
-            {
-                return NotFound("Login is not unique");
-            }
-            if (!isEmailUnique(commonModel))
-            {
-                return NotFound("e-mail is not unique");
-            }
-            commonModel = NullNotNeccessary(commonModel);
             var saltAsByte = GetSalt();
             var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
-            commonModel.Id = Guid.NewGuid().ToString();
-            commonModel.UserSalt = saltAsString;
-            commonModel.UserPass = HashPassword(saltAsByte, commonModel.UserPass);
-            commonModel.Confirmed = false;
+            var hashedPassword = HashPassword(saltAsByte, userDto.UserPass);
+            string code = "";
 
-            _repositoryUsers.Register(commonModel);
-            _repositoryUsers.SaveChanges();
-            
-            MailOperator(commonModel, MailType.varyfication);
-
-            return Ok(commonModel);
-        }
-
-        private UserModel NullNotNeccessary (UserModel user)
-        {
-            UserModel newuser = user;
-            switch (user.UserType)
+            string sqlProc = "exec dbo.RegisterUser";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@UserType",UserType.person.ToString()},
+                      { "@UserLogin",userDto.UserLogin },
+                      { "@UserPass",hashedPassword},
+                      { "@UserName",userDto.UserName},
+                      { "@UserSureName",userDto.UserSureName},
+                      { "@UserTaxNumber",userDto.UserTaxNumber},
+                      { "@UserAddress",userDto.UserAddress},
+                      { "@UserCity",userDto.UserCity},
+                      { "@UserZipCode",userDto.UserZipCode},
+                      { "@UserMail",userDto.UserMail},
+                      { "@UserPhoneNumber",userDto.UserPhoneNumber},
+                      { "@UserPhoneNumber2",userDto.UserPhoneNumber2},
+                      { "@UserSalt",saltAsString},
+                      { "@UserRole","user"},
+                      { "@Confirmed", false.ToString()}
+            };
+            UserModel userModel = new UserModel();
+            DbHandler dbHandler = new DbHandler();
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            try
             {
-                case "person":
-                    user.UserTaxNumber = null;
-                    break;
-                case "company":
-                    user.UserSureName = null;
-                    break;
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                string JSONModel = string.Empty;
+                foreach (DataRow row in dataSet.Tables["tab"].Rows)
+                {
+                   JSONModel = JsonConvert.SerializeObject(row.Table);
+                    userModel = JsonConvert.DeserializeObject<UserModel[]>(JSONModel).FirstOrDefault();
+                }
+                foreach (DataRow row in dataSet.Tables["tab1"].Rows)
+                {
+                    code = row["Code"].ToString();
+                    string typeOfCode = row["TypeOfCode"].ToString();
+                }
+            }catch(Exception e)
+            {
+                return Conflict(e.Message);
             }
+            MailOperator(userModel, MailType.varyfication, code);
 
-            return user;
+            return Ok(userModel);
         }
 
-        private bool MailOperator(UserModel userReciever, MailType mailType)
+        [HttpGet("{code}", Name = "ValidateCode")]
+        public ActionResult<UserModel> ValidateCode(string code)
         {
+            Console.WriteLine("sss");
+            return Ok();
+        }
 
-            string rawCode = CodeHandler.GenerateRawCode();
-            DateTime cretionDate = DateTime.UtcNow;
-            DateTime expireDate = CodeHandler.SetExpireDate(cretionDate, mailType);
-            CodeModel codeModel = CodeHandler.CodeModelCreator(rawCode, userReciever, cretionDate, expireDate, mailType);
+        private bool MailOperator(UserModel userReciever, MailType mailType, string code = null)
+        {
             EmailSender email = new EmailSender();
-            string mailBody = email.BodyBuilder(rawCode, mailType);
+            string mailBody = email.BodyBuilder(code, mailType, userReciever);
             string mailSubject = email.CreateSubject(mailType);
-
-            _repositoryCodes.DeactiveCode(userReciever);
             email.PrepareEmail(userReciever.UserMail, mailBody, mailSubject);
-            var code = _mapper.Map<CodeModel>(codeModel);
-
-            _repositoryCodes.AddCode(code);
-            _repositoryCodes.SaveChanges();
-
             return true;
         }
-
-         
+    
         private string HashPassword(byte[] salt, string password)
         {
             byte[] passAsByte = Encoding.ASCII.GetBytes(password);
@@ -381,16 +503,6 @@ namespace Comander.Controllers
             }
         }
 
-        private bool isLoginUnique(UserModel user)
-        {
-            return !_repositoryUsers.isUserInDb(user);
-        }
-
-        private bool isEmailUnique(UserModel user)
-        {
-            return !_repositoryUsers.isEmailInDb(user);
-        }
-
     }
 
     public class UserToken
@@ -408,7 +520,7 @@ namespace Comander.Controllers
     {
         varyfication,
         recovery,
-        changePassword
+        changePassConfirmation
     }
 }
 

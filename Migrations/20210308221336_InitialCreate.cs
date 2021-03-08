@@ -77,6 +77,19 @@ namespace Comander.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShootersAtRun",
+                columns: table => new
+                {
+                    id = table.Column<string>(nullable: false),
+                    shooterId = table.Column<string>(nullable: true),
+                    runId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShootersAtRun", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -84,6 +97,7 @@ namespace Comander.Migrations
                     UserType = table.Column<string>(nullable: true),
                     UserLogin = table.Column<string>(nullable: true),
                     UserPass = table.Column<string>(nullable: true),
+                    PasswordToChange = table.Column<string>(nullable: true),
                     UserName = table.Column<string>(nullable: true),
                     UserSureName = table.Column<string>(nullable: true),
                     UserTaxNumber = table.Column<string>(nullable: true),
@@ -116,6 +130,9 @@ namespace Comander.Migrations
 
             migrationBuilder.DropTable(
                 name: "Run");
+
+            migrationBuilder.DropTable(
+                name: "ShootersAtRun");
 
             migrationBuilder.DropTable(
                 name: "Users");

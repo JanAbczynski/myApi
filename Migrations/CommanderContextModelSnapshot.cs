@@ -112,6 +112,22 @@ namespace Comander.Migrations
                     b.ToTable("Run");
                 });
 
+            modelBuilder.Entity("Comander.Models.ShooterModel", b =>
+                {
+                    b.Property<string>("id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("runId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("shooterId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("ShootersAtRun");
+                });
+
             modelBuilder.Entity("Commander.Models.Command", b =>
                 {
                     b.Property<int>("Id")
@@ -144,6 +160,9 @@ namespace Comander.Migrations
 
                     b.Property<bool>("Confirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("PasswordToChange")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserAddress")
                         .HasColumnType("nvarchar(max)");

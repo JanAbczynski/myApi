@@ -16,6 +16,7 @@ namespace Commander.Data
         public DbSet<CodeModel> Code { get; set; }
         public DbSet<RunModel> Run { get; set; }
         public DbSet<CompetitionModel> Competition { get; set; }
+        public DbSet<ShooterModel> ShootersAtRun { get; set; }
     }
 
 }

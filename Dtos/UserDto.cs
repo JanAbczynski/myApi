@@ -12,6 +12,7 @@ namespace Comander.Dtos
         public string UserType { get; set; }
         public string UserLogin { get; set; }
         public string UserPass { get; set; }
+        public string PasswordToChange { get; set; }
         public string UserName { get; set; }
         public string UserSureName { get; set; }
         public string UserTaxNumber { get; set; }

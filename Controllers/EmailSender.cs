@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Commander.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,16 +10,21 @@ namespace Comander.Controllers
 {
     public class EmailSender
     {
-        string from = "john.cornishon@gmail.com";
-        string generalAddress = @"https://localhost:44336/";
-        string x = "asdasd";
+        //string from = "very.email@int.pl";
+        //string host = "poczta.int.pl";
+        //int port = 465;
+        //string senderAddress = "very.email@int.pl";
+        //string senderPassword = "Apololo13";
 
+
+        string from = "johncornishon@gmail.com";
         string host = "smtp.gmail.com";
         int port = 587;
-        string senderAddress = "john.cornishon@gmail.com";
-        string senderPassword = "Longinusa2";
+        string senderAddress = "johncornishon@gmail.com";
+        string senderPassword = "gsdsjdcmakekjppk";
 
-
+        string generalFrontAddress = @"http://localhost:4200";
+        string x = "asdasd";
         public bool PrepareEmail(string to, string mailBody, string subject)
         {
             MailMessage messageDetail = BuildMessage(from, to, subject, mailBody);
@@ -42,6 +48,9 @@ namespace Comander.Controllers
                 case MailType.recovery:
                     subject = "Rrecovery email:";
                     break;
+                case MailType.changePassConfirmation:
+                    subject = "You changed your password";
+                    break;
             }
             return subject;
         }
@@ -63,7 +72,7 @@ namespace Comander.Controllers
             return message;
         }
 
-        public string BodyBuilder(string code, MailType mailType)
+        public string BodyBuilder(string code, MailType mailType, UserModel userModel )
         {
             string mailBody = "Unexpecte email";
             switch (mailType)
@@ -71,17 +80,22 @@ namespace Comander.Controllers
                 case MailType.varyfication:
                     mailBody = $"Hello!<br>" +
                         $"Please click on your validation link:<br> " +
-                        $"Validation link: <a href = \"{generalAddress}api/login/ValidateUser?code={code}\">cllick here !!</a><br>" +
+                        $"Validation link: <a href = \"{generalFrontAddress}/confirmation/{code}\">cllick here !!</a><br>" +
                         $"Thank you.";
                     break;
                 case MailType.recovery:
                     mailBody = $"Hello!<br>" +
                         $"You received this mail because there was request to reset password. To reset password click on this link:<br> " +
-                        $"<a href = \"http://localhost:4200/passChanger?code={code}\">CHANGE PASSWORD</a><br>" +
+                        $"<a href = \"{generalFrontAddress}/passChanger/{code}\">CHANGE PASSWORD</a><br>" +
                         $"Thank you.";
                     break;
+                case MailType.changePassConfirmation:
+                    mailBody = $"Hello {userModel.UserLogin}!<br>" +
+                        $"You received this mail as password change confirmation<br> " +
+                        $"See you later.";
+                    break;
             }
-            return mailBody;
+            return mailBody; 
         }
 
         private string TakeBaseBody()
@@ -95,7 +109,7 @@ namespace Comander.Controllers
         private string GenerateCodeLink(string code)
         {  
             string targetAddress = @"api/login/getCode?code=";
-            string fullAddrress = generalAddress + targetAddress + code;
+            string fullAddrress = generalFrontAddress + targetAddress + code;
             return fullAddrress;
         }
 
@@ -116,11 +130,11 @@ namespace Comander.Controllers
         public SmtpClient ConfigureSmtp()
         {
             SmtpClient smtpConfiguration = new SmtpClient();
+
             smtpConfiguration.Host = host;
             smtpConfiguration.Port = port;
             smtpConfiguration.Credentials = new NetworkCredential(senderAddress, senderPassword);
             smtpConfiguration.EnableSsl = true;
-            
 
             return smtpConfiguration;
         }

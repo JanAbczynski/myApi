@@ -21,7 +21,7 @@ namespace Comander
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseUrls("https://localhost:44336/");
-                    webBuilder.UseKestrel();
+                    //webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 });
     }

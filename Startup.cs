@@ -45,11 +45,12 @@ namespace Comander
             services.AddCors(options => {
                 options.AddPolicy(AllowAllOriginsPolicy, 
                 builder =>
-                {
+                    {
                     //builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
                     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                });
-            });
+                    });
+                }
+            );
 
 
             services.AddDbContext<CommanderContext>(opt => opt.UseSqlServer
@@ -91,6 +92,7 @@ namespace Comander
             services.AddScoped<IRunRepo, SqlRunRepo>();
             services.AddScoped<ICompetitionRepo, SqlCompetitionRepo>();
             services.AddScoped<ICommanderRepo, SqlCommanderRepo>();
+            services.AddScoped<IShooterRepo, SqlShooterRepo>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

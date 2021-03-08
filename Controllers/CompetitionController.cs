@@ -83,16 +83,27 @@ namespace Comander.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CompetitionDto>> GetAllCompetition()
         {
-            DataSet dataset = new DataSet();
-            SqlConnection connectionString = new SqlConnection("Server=(localdb)\\MyLocalDB; Initial Catalog=Commander_DB; User ID=CommanderAPI; Password=qwe123qwe;");
-            SqlDataAdapter adapter = new SqlDataAdapter();
-            adapter.SelectCommand = new SqlCommand(
-            "SELECT * FROM [users]", connectionString);
-            adapter.Fill(dataset);
- 
+            //DataSet dataset = new DataSet();
+            //SqlDataAdapter adapter = new SqlDataAdapter();
+            //adapter.SelectCommand = new SqlCommand(
+            //"SELECT * FROM [users]", connectionString);
+            //adapter.Fill(dataset);
 
 
-            var competition = _repositoryCompetition.GetAllCompetition();
+            //SqlConnection connectionString = new SqlConnection("Server=(localdb)\\MyLocalDB; Initial Catalog=Commander_DB; User ID=CommanderAPI; Password=qwe123qwe;");
+            //DataTable dataTable = new DataTable();
+            //SqlDataAdapter sqlDataAdapter = new SqlDataAdapter("SELECT * FROM [users]", connectionString);
+            ////sqlDataAdapter.SelectCommand.Parameters.AddWithValue("@OrderID", OrderID);
+            //sqlDataAdapter.Fill(dataTable);
+
+            //foreach (DataRow orderDataRow in dataTable.Rows)
+            //{
+            //    Console.WriteLine(orderDataRow);
+            //}
+
+
+
+                var competition = _repositoryCompetition.GetAllCompetition();
 
             return Ok(_mapper.Map<IEnumerable<CompetitionDto>>(competition));
         }
@@ -108,7 +119,11 @@ namespace Comander.Controllers
             var competition = _repositoryCompetition.GetCompetitionById(id);
             if (competition != null)
             {
-                if(competition.ownerId != user.Id)
+                if(user.UserType == UserType.person.ToString())
+                {
+                    return Ok(_mapper.Map<CompetitionDto>(competition));
+                }
+                if(competition.ownerId != user.Id && user.UserType == UserType.company.ToString())
                 {
                     return NotFound();
                 }
@@ -144,6 +159,14 @@ namespace Comander.Controllers
             return Ok(_mapper.Map<IEnumerable<RunDto>>(run));
         }
 
+
+        [HttpPost]
+        public ActionResult RegisterUserInRun(RunModel run)
+        {
+
+
+            return Ok();
+        }
 
 
 
