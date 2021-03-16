@@ -78,8 +78,9 @@ namespace Comander.Controllers
 
         public void GenerateProcedure(string sqlProc, Dictionary<string, object> queryParams)
         {
-            StringBuilder newQuery = new StringBuilder(sqlProc);
-            newQuery.Append(" ");
+            StringBuilder newQuery = new StringBuilder("CREATE PROCEDURE");
+            newQuery.Append(sqlProc.Replace("exec ", ""));
+            newQuery.Append(" (");
             int numberOfParams = queryParams.Count;
             int actualparam = 0;
             foreach (var param in queryParams)
@@ -91,8 +92,44 @@ namespace Comander.Controllers
                     newQuery.Append(", ");
                 }
             }
+            newQuery.Append(") AS BEGIN      END");
             Console.WriteLine(newQuery);
         }
+
+        public void GenerateQuerryValues(string sqlProc, Dictionary<string, object> queryParams)
+        {
+            StringBuilder newQuery = new StringBuilder();
+            int numberOfParams = queryParams.Count;
+            int actualparam = 0;
+            newQuery.Append("(");
+            foreach (var param in queryParams)
+            {
+                actualparam++;
+                newQuery.Append(param.Key.Replace("@", "") );
+                if (actualparam < numberOfParams)
+                {
+                    newQuery.Append(",  ");
+                }
+            }
+            newQuery.Append(")");
+
+            StringBuilder newQuery2 = new StringBuilder();
+            actualparam = 0;
+            newQuery2.Append("(");
+            foreach (var param in queryParams)
+            {
+                actualparam++;
+                newQuery2.Append(param.Key);
+                if (actualparam < numberOfParams)
+                {
+                    newQuery2.Append(", ");
+                }
+            }
+            newQuery2.Append(")");
+            Console.WriteLine(newQuery);
+            Console.WriteLine(newQuery2);
+        }
+
     }
 
     public class T

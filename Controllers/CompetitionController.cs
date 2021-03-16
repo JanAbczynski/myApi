@@ -54,16 +54,41 @@ namespace Comander.Controllers
         }
 
         [HttpPost]
-        public ActionResult addCompetition(CompetitionModel competition)
+        public ActionResult AddCompetition(CompetitionModel competition)
         {
-            UserModel owner = UserHandler.GetUserLoginByToken(Request.Headers["authorization"]);
+            UserModel owner = UserHandler.GetUserDataByToken(Request.Headers["authorization"]);
+            owner = UserHandler.GetUserDataFromDbByLogin(owner.UserLogin);
 
-            owner = _repositoryUsers.GetUserByLogin(owner.UserLogin);
+            #region dbAccess
+            string sqlProc = "exec dbo.AddCompetition";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@description",competition.description},
+                      { "@startTime",competition.startTime.ToString("yyyy-MM-dd HH:mm:ss.fff") },
+                      { "@endTime",competition.endTime.ToString("yyyy-MM-dd HH:mm:ss.fff")},
+                      { "@placeOf",competition.placeOf },
+                      { "@ownerId",competition.ownerId }
+            };
+            DbHandler dbHandler = new DbHandler();
+            dbHandler.GenerateProcedure(sqlProc, queryParams);
+            dbHandler.GenerateQuerryValues(sqlProc, queryParams);
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            try
+            {
+                UserModel userModel = new UserModel();
+                DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+                foreach (DataRow row in dataSet.Tables["tab"].Rows)
+                {
+                    userModel.UserMail = row["UserMail"].ToString();
+                    userModel.UserLogin = row["UserLogin"].ToString();
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return Conflict(e.Message);
+            }
 
-            competition.Id = Guid.NewGuid().ToString();
-            competition.ownerId = owner.Id;
-            _repositoryCompetition.Register(competition);
-            _repositoryCompetition.SaveChanges();
+            #endregion
 
             return Ok();
         }
@@ -72,7 +97,7 @@ namespace Comander.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CompetitionDto>> GetAllCompetitionForUser()
         {
-            UserModel user = UserHandler.GetUserLoginByToken(Request.Headers["authorization"]);
+            UserModel user = UserHandler.GetUserDataByToken(Request.Headers["authorization"]);
             user = _repositoryUsers.GetUserByLogin(user.UserLogin);
 
             var competition = _repositoryCompetition.GetAllCompetitionForUser(user.Id);
@@ -113,7 +138,7 @@ namespace Comander.Controllers
         [HttpGet("{id}")]
         public ActionResult<CompetitionDto> GetCompetitionById(string id)
         {
-            UserModel user = UserHandler.GetUserLoginByToken(Request.Headers["authorization"]);
+            UserModel user = UserHandler.GetUserDataByToken(Request.Headers["authorization"]);
             user = _repositoryUsers.GetUserByLogin(user.UserLogin);
 
             var competition = _repositoryCompetition.GetCompetitionById(id);
@@ -135,7 +160,7 @@ namespace Comander.Controllers
         [HttpPost]
         public ActionResult addRun(RunModel run)
         {
-            UserModel owner = UserHandler.GetUserLoginByToken(Request.Headers["authorization"]);
+            UserModel owner = UserHandler.GetUserDataByToken(Request.Headers["authorization"]);
 
             owner = _repositoryUsers.GetUserByLogin(owner.UserLogin);
 
@@ -151,7 +176,7 @@ namespace Comander.Controllers
         [HttpGet("{id}")]
         public ActionResult<IEnumerable<RunDto>> GetRunByCompetitionId(string id)
         {
-            UserModel user = UserHandler.GetUserLoginByToken(Request.Headers["authorization"]);
+            UserModel user = UserHandler.GetUserDataByToken(Request.Headers["authorization"]);
             user = _repositoryUsers.GetUserByLogin(user.UserLogin);
 
             var run = _repositoryRun.GetRunByCompetitionId(id);

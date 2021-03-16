@@ -14,7 +14,7 @@ namespace Comander.Models
         public string description { get; set; }
         //public RunModel[] runs { get; set; }
         public DateTime startTime { get; set; }
-        public DateTime duration { get; set; }
+        public DateTime endTime { get; set; }
         public string placeOf { get; set; }
 
     }

@@ -188,46 +188,71 @@ namespace Comander.Controllers
 
         [Authorize]
         [HttpPost]
-        public ActionResult PassChangerFromPanel(TempModel passedModel)
+        public ActionResult PassChangerFromPanel(TempModel passedTempModel)
         {
-            UserModel userModel = GetUserInfoFromToken(passedModel.token);
-            userModel.UserPass = passedModel.oldPass;
-            userModel.PasswordToChange = passedModel.userPass;
-            userModel.UserSalt = GetBasicLoginDataFromDb(userModel.UserLogin).UserSalt;
-            userModel = AuthenticateUser(userModel);
+            string tempNewPass = passedTempModel.userPass;
+            UserModel newUserModel = null;
+            //UserModel oldUserModel = GetUserInfoFromToken(passedTempModel.token);
+            UserModel oldUserModel = UserHandler.GetUserDataByToken(passedTempModel.token);
+            oldUserModel.UserPass = passedTempModel.oldPass;
+            //oldUserModel = GetUserDataFromDbByLogin(oldUserModel.UserLogin);
+            oldUserModel = UserHandler.GetUserDataFromDbByLogin(oldUserModel.UserLogin);
+            oldUserModel.UserPass = passedTempModel.oldPass;
+            newUserModel = AuthenticateUser(oldUserModel);
 
-            string sqlProc = "exec dbo.UpdateUserData";
-            Dictionary<string, object> queryParams = new Dictionary<string, object> {
-                      { "@UserType",UserType.person.ToString()},
-                      { "@UserLogin",userModel.UserLogin },
-                      { "@UserPass",userModel.UserPass},
-                      { "@UserName",userModel.UserName},
-                      { "@UserSureName",userModel.UserSureName},
-                      { "@UserTaxNumber",userModel.UserTaxNumber},
-                      { "@UserAddress",userModel.UserAddress},
-                      { "@UserCity",userModel.UserCity},
-                      { "@UserZipCode",userModel.UserZipCode},
-                      { "@UserMail",userModel.UserMail},
-                      { "@UserPhoneNumber",userModel.UserPhoneNumber},
-                      { "@UserPhoneNumber2",userModel.UserPhoneNumber2},
-                      { "@UserSalt",userModel.UserSalt},
-                      { "@UserRole","user"},
-                      { "@Confirmed", false.ToString()}
-            };
-            DbHandler dbHandler = new DbHandler();
-            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            if (newUserModel == null)
+            {
+                return NotFound();
+            }
 
-            dbHandler.GenerateProcedure(sqlProc, queryParams);
+            var saltAsByte = GetSalt();
+
+            var saltAsString = Encoding.UTF8.GetString(saltAsByte, 0, saltAsByte.Length);
+            var hashedPassword = HashPassword(saltAsByte, passedTempModel.userPass);
+
+            newUserModel.UserPass = hashedPassword;
+            newUserModel.UserSalt = saltAsString;
+            UpdateUserDataInDB(newUserModel);
+
+            //dbHandler.GenerateProcedure(sqlProc, queryParams);
             return Ok();
         }
 
+        private void UpdateUserDataInDB(UserModel newUserModel)
+        {
+            string sqlProc = "exec UpdateUserData";
+            Dictionary<string, object> queryParams = new Dictionary<string, object> {
+                      { "@Id",newUserModel.Id},
+                      { "@UserType",newUserModel.UserType},
+                      { "@UserLogin",newUserModel.UserLogin},
+                      { "@UserPass",newUserModel.UserPass},
+                      { "@UserName",newUserModel.UserName},
+                      { "@UserSureName",newUserModel.UserSureName},
+                      { "@UserTaxNumber",newUserModel.UserTaxNumber},
+                      { "@UserAddress",newUserModel.UserAddress},
+                      { "@UserCity",newUserModel.UserCity},
+                      { "@UserZipCode",newUserModel.UserZipCode},
+                      { "@UserMail",newUserModel.UserMail},
+                      { "@UserPhoneNumber",newUserModel.UserPhoneNumber},
+                      { "@UserPhoneNumber2",newUserModel.UserPhoneNumber2},
+                      { "@UserSalt",newUserModel.UserSalt},
+                      { "@UserRole",newUserModel.UserRole},
+                      { "@Confirmed", newUserModel.Confirmed}
+            };
 
+            DbHandler dbHandler = new DbHandler();
+            dbHandler.GenerateProcedure(sqlProc, queryParams);
 
-        private UserModel GetBasicLoginDataFromDb(string login)
+            sqlProc = dbHandler.AddParamsToQuery(sqlProc, queryParams);
+            DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
+
+            throw new NotImplementedException();
+        }
+
+        private UserModel GetUserDataFromDbByLogin(string login)
         {
             UserModel userModel = new UserModel();
-            string saltFromDb = "";
-            string sqlProc = "SELECT UserSalt, UserPass, UserLogin, UserMail, UserType, UserRole FROM Users WHERE UserLogin = @UserLogin";
+            string sqlProc = "SELECT * FROM Users WHERE UserLogin = @UserLogin";
             Dictionary<string, object> queryParams = new Dictionary<string, object> {
                       { "@UserLogin", login }
             };
@@ -237,12 +262,23 @@ namespace Comander.Controllers
                 DataSet dataSet = dbHandler.GetSetFromDb(sqlProc, queryParams);
                 foreach (DataRow row in dataSet.Tables["tab"].Rows)
                 {
-                    userModel.UserSalt = row["UserSalt"].ToString();
-                    userModel.UserPass = row["UserPass"].ToString();
-                    userModel.UserLogin = row["UserLogin"].ToString();
-                    userModel.UserMail = row["UserMail"].ToString();
+
+                    userModel.Id = row["Id"].ToString();
                     userModel.UserType = row["UserType"].ToString();
+                    userModel.UserLogin = row["UserLogin"].ToString();
+                    userModel.UserPass = row["UserPass"].ToString();
+                    userModel.UserName = row["UserName"].ToString();
+                    userModel.UserSureName = row["UserSureName"].ToString();
+                    userModel.UserTaxNumber = row["UserTaxNumber"].ToString();
+                    userModel.UserAddress = row["UserAddress"].ToString();
+                    userModel.UserCity = row["UserCity"].ToString();
+                    userModel.UserZipCode = row["UserZipCode"].ToString();
+                    userModel.UserMail = row["UserMail"].ToString();
+                    userModel.UserPhoneNumber = row["UserPhoneNumber"].ToString();
+                    userModel.UserPhoneNumber2 = row["UserPhoneNumber2"].ToString();
+                    userModel.UserSalt = row["UserSalt"].ToString();
                     userModel.UserRole = row["UserRole"].ToString();
+                    userModel.Confirmed = Convert.ToBoolean(row["Confirmed"]);
                 }
             }catch(Exception e)
             {
@@ -318,7 +354,7 @@ namespace Comander.Controllers
             return Ok();
         }
 
-        private UserModel GetUserInfoFromToken(string code)
+        public UserModel GetUserInfoFromToken(string code)
         {
             UserModel userModel = new UserModel();
             var jwt = code;
@@ -332,30 +368,31 @@ namespace Comander.Controllers
             return userModel;
         }
 
-        [HttpPost]
-        public IActionResult GetUsersData(UserToken token)
-        {
-            var jwt = token.tokenCode;
-            var handler = new JwtSecurityTokenHandler();
-            var tokenDecoded = handler.ReadJwtToken(jwt);
-            UserModel userModelTokenOnly = new UserModel();
-            userModelTokenOnly.UserLogin = tokenDecoded.Subject;
-            UserModel userModel = _repositoryUsers.GetUserByLogin(userModelTokenOnly.UserLogin);
-            userModel.UserPass = null;
-            userModel.UserSalt = null;
+        //[HttpPost]
+        //public IActionResult GetUsersData(UserToken token)
+        //{
+        //    var jwt = token.tokenCode;
+        //    var handler = new JwtSecurityTokenHandler();
+        //    var tokenDecoded = handler.ReadJwtToken(jwt);
+        //    UserModel userModelTokenOnly = new UserModel();
+        //    userModelTokenOnly.UserLogin = tokenDecoded.Subject;
+        //    UserModel userModel = _repositoryUsers.GetUserByLogin(userModelTokenOnly.UserLogin);
+        //    userModel.UserPass = null;
+        //    userModel.UserSalt = null;
 
-            return Ok(_mapper.Map<UserDto>(userModel));
-        }
+        //    return Ok(_mapper.Map<UserDto>(userModel));
+        //}
 
-        private UserModel AuthenticateUser(UserModel login)
+        private UserModel AuthenticateUser(UserModel loginUserModel)
         {
             UserModel userLoginDataFromDb = null;
-            userLoginDataFromDb = GetBasicLoginDataFromDb(login.UserLogin);
+            userLoginDataFromDb = UserHandler.GetUserDataFromDbByLogin(loginUserModel.UserLogin);
+            //userLoginDataFromDb = GetUserDataFromDbByLogin(loginUserModel.UserLogin);
             var saltAsByte = Encoding.UTF8.GetBytes(userLoginDataFromDb.UserSalt);
-            login.UserPass = HashPassword(saltAsByte, login.UserPass);
-            if (login.UserPass == userLoginDataFromDb.UserPass)
-            {
-                return userLoginDataFromDb ;
+            loginUserModel.UserPass = HashPassword(saltAsByte, loginUserModel.UserPass);
+            if (loginUserModel.UserPass == userLoginDataFromDb.UserPass)
+            {          
+                return userLoginDataFromDb;
             }
             else
             {
@@ -411,7 +448,7 @@ namespace Comander.Controllers
 
             string sqlProc = "exec dbo.RegisterUser";
             Dictionary<string, object> queryParams = new Dictionary<string, object> {
-                      { "@UserType",UserType.person.ToString()},
+                      { "@UserType",userDto.UserType},
                       { "@UserLogin",userDto.UserLogin },
                       { "@UserPass",hashedPassword},
                       { "@UserName",userDto.UserName},

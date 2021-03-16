@@ -18,6 +18,10 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="dbBackUp\" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 
